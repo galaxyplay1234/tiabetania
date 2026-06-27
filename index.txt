@@ -52,7 +52,7 @@
                 background: rgba(0, 0, 0, 0.06);
                 display: grid;
                 place-items: center;
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: 500;
                 transition: background 0.2s ease;
             }
@@ -112,6 +112,19 @@
             }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+            input[type="date"] {
+                -webkit-appearance: none;
+                appearance: none;
+                background-color: #ffffff;
+                color: #111827;
+                text-align: left;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 20px;
+                padding-right: 40px;
+            }
         }
 
         html, body {
@@ -125,19 +138,16 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
-        <!-- Cabeçalho -->
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
+                <button onclick="atualizarDados()" class="btn-header" title="Atualizar Balanço">🔄</button>
                 <button onclick="abrirModalBanca()" class="btn-header" title="Configurar Banca">⚙️</button>
                 <button onclick="abrirModal()" class="btn-header">+</button>
             </div>
         </header>
 
-        <!-- Página Home -->
         <div id="paginaHome" class="px-6 py-6 space-y-6">
-
-            <!-- Card com Banca e Saldo -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="flex justify-between items-center mb-3">
                     <p class="text-gray-500 text-base">Banca Inicial</p>
@@ -157,7 +167,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
@@ -165,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- Resumo Geral -->
             <div class="bg-white rounded-2xl p-5 shadow-sm space-y-4">
                 <div>
                     <p class="text-gray-500 text-base">Valor total apostado</p>
@@ -186,7 +194,6 @@
             </div>
         </div>
 
-        <!-- Página Histórico -->
         <div id="paginaHistorico" class="hidden px-6 py-6">
             <h2 class="text-xl font-semibold mb-4">Histórico de Apostas</h2>
             <div id="listaHistorico" class="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
@@ -197,7 +204,6 @@
             </div>
         </div>
 
-        <!-- Menu Inferior -->
         <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
             <div class="flex justify-between items-center h-16">
                 <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
@@ -211,7 +217,6 @@
             </div>
         </nav>
 
-        <!-- Modal para definir/alterar Banca -->
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -221,14 +226,13 @@
                 <form onsubmit="salvarBanca(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor da Banca (R$)</label>
-                        <input type="number" step="0.01" min="0" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
+                        <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
                     </div>
                     <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Banca</button>
                 </form>
             </div>
         </div>
 
-        <!-- Modal de Registro/Edição de Aposta -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -237,14 +241,18 @@
                 </div>
                 <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
                     <input type="hidden" id="idAposta" value="">
+                    <input type="hidden" id="resultado" value="">
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
-                        <input type="number" step="0.01" min="0.10" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 100,00" required>
+                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,00" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
-                        <input type="number" step="0.01" min="1.01" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.50" required>
+                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.75" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
                         <div class="flex gap-2">
@@ -252,17 +260,23 @@
                             <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Perdida</div>
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
-                        <input type="hidden" id="resultado" value="">
                     </div>
-                    <!-- Campo aparece apenas quando Cashout for selecionado -->
+
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
+                        <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                    </div>
+
                     <div id="campoValorCashout" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
-                        <input type="number" step="0.01" min="0" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 125,00">
+                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 25,30">
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
                         <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
                     </div>
+
                     <div class="flex gap-3 mt-3">
                         <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
                         <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar</button>
@@ -276,6 +290,44 @@
         let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
+
+        // Função para pegar data de hoje no formato local
+        function dataHojeLocal() {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        function formatarDataExibicao(dataISO) {
+            if (!dataISO) return '';
+            const [ano, mes, dia] = dataISO.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function formatarParaExibicao(valor) {
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        function converterParaNumero(valorTexto) {
+            return parseFloat(valorTexto.replace(',', '.'));
+        }
+
+        function formatarMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            if (valor === '') { input.value = ''; return; }
+            valor = (valor / 100).toFixed(2);
+            valor = valor.replace('.', ',');
+            input.value = valor;
+        }
+
+        function formatarOdd(input) {
+            let valor = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+            const partes = valor.split('.');
+            if (partes.length > 2) valor = partes[0] + '.' + partes[1];
+            input.value = valor;
+        }
 
         function iniciarGrafico() {
             const ctx = document.getElementById('graficoResultados').getContext('2d');
@@ -294,10 +346,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { size: 14 } }
-                        },
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
                         tooltip: { enabled: false }
                     }
                 },
@@ -309,13 +358,10 @@
                         ctx.fillStyle = '#FFFFFF';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-
                         const meta = chart.getDatasetMeta(0);
                         meta.data.forEach((fatia, i) => {
-                            const posicao = fatia.tooltipPosition();
-                            if (data.datasets[0].data[i] > 0) {
-                                ctx.fillText(data.datasets[0].data[i], posicao.x, posicao.y);
-                            }
+                            const pos = fatia.tooltipPosition();
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
                         });
                     }
                 }]
@@ -325,7 +371,6 @@
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            
             if (pagina === 'home') {
                 document.getElementById('tabHome').classList.add('tab-active');
                 document.getElementById('tabHome').classList.remove('tab-inactive');
@@ -342,7 +387,9 @@
         function abrirModalBanca() {
             document.getElementById('modalBanca').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('inputBanca').value = bancaInicial.toFixed(2);
+            const input = document.getElementById('inputBanca');
+            input.value = bancaInicial > 0 ? formatarParaExibicao(bancaInicial) : '';
+            input.oninput = () => formatarMoeda(input);
         }
 
         function fecharModalBanca() {
@@ -352,11 +399,15 @@
 
         function salvarBanca(e) {
             e.preventDefault();
-            const valor = parseFloat(document.getElementById('inputBanca').value);
-            bancaInicial = valor;
-            localStorage.setItem('bancaInicial', valor);
-            fecharModalBanca();
-            atualizarDados();
+            const valor = converterParaNumero(document.getElementById('inputBanca').value);
+            if (!isNaN(valor) && valor >= 0) {
+                bancaInicial = valor;
+                localStorage.setItem('bancaInicial', valor);
+                fecharModalBanca();
+                atualizarDados();
+            } else {
+                alert('Digite um valor válido!');
+            }
         }
 
         function selecionarResultado(tipo) {
@@ -364,27 +415,37 @@
             document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
             document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
             document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
-            
             document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
+
+            const valorApostaInput = document.getElementById('valorApostado');
+            const valorCashoutInput = document.getElementById('valorCashout');
+            const oddInput = document.getElementById('odd');
+            const dataInput = document.getElementById('dataAposta');
+
+            valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
+            valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
+            oddInput.oninput = () => formatarOdd(oddInput);
+
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
-                document.getElementById('valorApostado').value = aposta.valor.toFixed(2);
-                document.getElementById('odd').value = aposta.odd.toFixed(2);
+                valorApostaInput.value = formatarParaExibicao(aposta.valor);
+                oddInput.value = aposta.odd.toFixed(2);
+                dataInput.value = aposta.dataISO || dataHojeLocal();
                 document.getElementById('observacao').value = aposta.obs || '';
-                document.getElementById('valorCashout').value = aposta.valorCashout ? aposta.valorCashout.toFixed(2) : '';
+                valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
                 document.getElementById('tituloModal').textContent = 'Nova Aposta';
                 document.getElementById('formAposta').reset();
                 document.getElementById('idAposta').value = '';
+                dataInput.value = dataHojeLocal();
                 selecionarResultado('');
                 document.getElementById('btnExcluir').classList.add('hidden');
             }
@@ -398,22 +459,33 @@
         function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
-            const valor = parseFloat(document.getElementById('valorApostado').value);
+            const valor = converterParaNumero(document.getElementById('valorApostado').value);
             const odd = parseFloat(document.getElementById('odd').value);
+            const dataISO = document.getElementById('dataAposta').value;
             const resultado = document.getElementById('resultado').value;
-            const valorCashout = document.getElementById('valorCashout').value ? parseFloat(document.getElementById('valorCashout').value) : null;
+            const valorCashoutTexto = document.getElementById('valorCashout').value.trim();
+            const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
             const obs = document.getElementById('observacao').value;
-            const data = new Date();
 
             if (!resultado) {
                 alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
                 return;
             }
-
-            if (resultado === 'cashout' && !valorCashout) {
-                alert('Informe o valor recebido no Cashout!');
+            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
+                alert('Informe um valor válido para o Cashout!');
                 return;
             }
+            if (!dataISO) {
+                alert('Selecione a data da aposta!');
+                return;
+            }
+            if (isNaN(odd) || odd < 1.01) {
+                alert('Digite uma odd válida (ex: 1.50)!');
+                return;
+            }
+
+            const dataFormatada = formatarDataExibicao(dataISO);
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
 
             let lucro, retorno;
             if (resultado === 'green') {
@@ -432,27 +504,16 @@
                 if (indice !== -1) {
                     apostas[indice] = {
                         ...apostas[indice],
-                        valor,
-                        odd,
+                        valor, odd, dataISO, data: dataFormatada,
                         valorCashout: resultado === 'cashout' ? valorCashout : null,
-                        retorno,
-                        lucro,
-                        resultado,
-                        obs
+                        retorno, lucro, resultado, obs, timestamp
                     };
                 }
             } else {
                 apostas.unshift({
-                    id: Date.now(),
-                    valor,
-                    odd,
+                    id: Date.now(), valor, odd, dataISO, data: dataFormatada,
                     valorCashout: resultado === 'cashout' ? valorCashout : null,
-                    retorno,
-                    lucro,
-                    resultado,
-                    obs,
-                    data: data.toLocaleDateString('pt-BR'),
-                    timestamp: data.getTime()
+                    retorno, lucro, resultado, obs, timestamp
                 });
             }
 
@@ -472,41 +533,59 @@
             }
         }
 
+        // ✅ CÁLCULO CORRIGIDO DEFINITIVO
         function atualizarDados() {
-            let totalInvestido = 0;
-            let totalLucro = 0;
-            let qtdGreen = 0, qtdRed = 0, qtdCashout = 0;
-            let balancoDia = 0;
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            const dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
+            // Recarrega dados do armazenamento
+            apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
+            bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
 
+            let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
+            const hojeISO = dataHojeLocal();
+            const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
+
+            // Percorre todas as apostas e soma corretamente
             apostas.forEach(a => {
                 totalInvestido += a.valor;
                 totalLucro += a.lucro;
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
                 else qtdCashout++;
-                if (a.data === hoje) balancoDia += a.lucro;
+                // ✅ Aqui soma o lucro/prejuízo COMPLETO do dia
+                if (a.dataISO === hojeISO) {
+                    balancoDia += a.lucro;
+                }
             });
 
             const saldoAtual = bancaInicial + totalLucro;
-            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2) : '0,00';
+            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
             const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
             const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
-            document.getElementById('bancaInicial').textContent = bancaInicial.toFixed(2).replace('.', ',');
-            document.getElementById('saldoTotal').textContent = saldoAtual.toFixed(2).replace('.', ',');
-            document.getElementById('balancoDia').textContent = balancoDia.toFixed(2).replace('.', ',');
+            document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
+            document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+
+            // ✅ Exibe balanço do dia com valor e cor corretos
+            const balancoDiaEl = document.getElementById('balancoDia');
+            if (balancoDia !== 0) {
+                balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
+                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+            } else {
+                balancoDiaEl.textContent = '--';
+                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
+            }
+
             document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
-            document.getElementById('valorInvestido').textContent = totalInvestido.toFixed(2).replace('.', ',');
-            document.getElementById('balancoTotal').textContent = `R$ ${totalLucro.toFixed(2).replace('.', ',')}`;
-            document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+            document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
+
+            const balancoTotalEl = document.getElementById('balancoTotal');
+            balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+            balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
             document.getElementById('tempoTotal').textContent = tempoTexto;
             document.getElementById('totalApostas').textContent = apostas.length;
 
             grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
             grafico.update();
-
             atualizarHistorico();
         }
 
@@ -518,39 +597,27 @@
             }
             lista.innerHTML = '';
             apostas.forEach(a => {
-                let cor, corClara, status;
-                if (a.resultado === 'green') {
-                    cor = 'text-green';
-                    corClara = 'bg-green/10';
-                    status = '🟢 Ganha';
-                } else if (a.resultado === 'red') {
-                    cor = 'text-red';
-                    corClara = 'bg-red/10';
-                    status = '🔴 Perdida';
-                } else {
-                    cor = 'text-yellow-600';
-                    corClara = 'bg-yellow/10';
-                    status = '🟡 Cashout';
-                }
-
+                const cor = a.resultado === 'green' ? 'text-green' : a.resultado === 'red' ? 'text-red' : 'text-yellow-600';
+                const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
+                const status = a.resultado === 'green' ? '🟢 Ganha' : a.resultado === 'red' ? '🔴 Perdida' : '🟡 Cashout';
                 lista.innerHTML += `
-                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
-                                <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">${a.obs || 'Aposta'}</p>
-                                <p class="text-sm text-gray-600">Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${a.valorCashout.toFixed(2).replace('.', ',')}` : ''}</p>
-                                <p class="text-xs text-gray-400">${a.data}</p>
-                            </div>
+                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
+                            <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                            <p class="font-semibold ${cor}">R$ ${a.lucro.toFixed(2).replace('.', ',')}</p>
+                        <div>
+                            <p class="font-medium">${a.obs || 'Aposta'}</p>
+                            <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(a.valor)}</p>
+                            <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(a.valorCashout)}` : ''}</p>
+                            <p class="text-xs text-gray-400">${a.data}</p>
                         </div>
-                    </div>`;
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
+                        <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(a.lucro)}</p>
+                    </div>
+                </div>`;
             });
         }
 
