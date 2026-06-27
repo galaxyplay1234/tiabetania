@@ -566,66 +566,84 @@
             }
         }
 
-        // ✅ CÁLCULO CORRIGIDO - Agora busca dados do Firebase
-        async function atualizarDados() {
-            // Busca banca
-            const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
-            bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+        // ✅ CÁLCULO CORRIGIDO DEFINITIVO - Balanço do dia funcionando
+async function atualizarDados() {
+    // Busca banca
+    const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
+    bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-            // Busca todas as apostas ordenadas por data
-            const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
-            const snapshot = await getDocs(q);
-            apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Busca todas as apostas ordenadas por data
+    const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+    const snapshot = await getDocs(q);
+    apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
-            const hojeISO = dataHojeLocal();
-            const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
+    let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
+    const hojeISO = dataHojeLocal(); // formato: YYYY-MM-DD
+    let dataInicial = null;
 
-            // Percorre todas as apostas e soma corretamente
-            apostas.forEach(a => {
-                totalInvestido += a.valor || 0;
-                totalLucro += a.lucro || 0;
-                if (a.resultado === 'green') qtdGreen++;
-                else if (a.resultado === 'red') qtdRed++;
-                else qtdCashout++;
-                // ✅ Aqui soma o lucro/prejuízo COMPLETO do dia
-                if (a.dataISO === hojeISO) {
-                    balancoDia += a.lucro || 0;
-                }
-            });
+    // Percorre todas as apostas e soma corretamente
+    apostas.forEach(a => {
+        const valor = a.valor || 0;
+        const lucro = a.lucro || 0;
 
-            const saldoAtual = bancaInicial + totalLucro;
-            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
-            const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
-            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+        totalInvestido += valor;
+        totalLucro += lucro;
 
-            document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
-            document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+        if (a.resultado === 'green') qtdGreen++;
+        else if (a.resultado === 'red') qtdRed++;
+        else if (a.resultado === 'cashout') qtdCashout++;
 
-            // ✅ Exibe balanço do dia com valor e cor corretos
-            const balancoDiaEl = document.getElementById('balancoDia');
-            if (balancoDia !== 0) {
-                balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
-                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
-            } else {
-                balancoDiaEl.textContent = '--';
-                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
-            }
-
-            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
-            document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
-
-            const balancoTotalEl = document.getElementById('balancoTotal');
-            balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
-            balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
-
-            document.getElementById('tempoTotal').textContent = tempoTexto;
-            document.getElementById('totalApostas').textContent = apostas.length;
-
-            grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
-            grafico.update();
-            atualizarHistorico();
+        // ✅ CORREÇÃO: Compara diretamente a data no formato ISO
+        if (a.dataISO === hojeISO) {
+            balancoDia += lucro;
         }
+
+        // Define a data mais antiga para calcular o tempo total
+        const dataAtual = new Date(a.dataISO);
+        if (!dataInicial || dataAtual < dataInicial) {
+            dataInicial = dataAtual;
+        }
+    });
+
+    const saldoAtual = bancaInicial + totalLucro;
+    const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
+
+    let diferencaDias = 0;
+    if (apostas.length > 0 && dataInicial) {
+        const hoje = new Date();
+        const diferencaMs = hoje - dataInicial;
+        diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+
+    document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
+    document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+
+    // ✅ Exibe balanço do dia com valor e cor corretos
+    const balancoDiaEl = document.getElementById('balancoDia');
+    if (balancoDia !== 0) {
+        balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
+        balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+    } else {
+        balancoDiaEl.textContent = 'R$ 0,00';
+        balancoDiaEl.className = 'text-lg font-medium text-gray-500';
+    }
+
+    document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
+    document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
+
+    const balancoTotalEl = document.getElementById('balancoTotal');
+    balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+    balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
+    document.getElementById('tempoTotal').textContent = tempoTexto;
+    document.getElementById('totalApostas').textContent = apostas.length;
+
+    grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
+    grafico.update();
+    atualizarHistorico();
+}
 
         function atualizarHistorico() {
             const lista = document.getElementById('listaHistorico');
