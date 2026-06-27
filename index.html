@@ -154,7 +154,7 @@
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
-                    <p class="text-gray-500 text-sm mt-4">Quantidade de Green e Red</p>
+                    <p class="text-gray-500 text-sm mt-4">Quantidade de Ganha, Perdida e Cashout</p>
                 </div>
             </div>
 
@@ -233,6 +233,11 @@
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                         <input type="hidden" id="resultado" value="">
+                    </div>
+                    <!-- Campo aparece apenas quando Cashout for selecionado -->
+                    <div id="campoValorCashout" class="hidden">
+                        <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
+                        <input type="number" step="0.01" min="0" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 125,00">
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
@@ -318,6 +323,9 @@
             document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
             document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
             document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
+            
+            // Mostra ou esconde o campo de valor do Cashout
+            document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
         function abrirModal(aposta = null) {
@@ -330,6 +338,7 @@
                 document.getElementById('valorApostado').value = aposta.valor.toFixed(2);
                 document.getElementById('odd').value = aposta.odd.toFixed(2);
                 document.getElementById('observacao').value = aposta.obs || '';
+                document.getElementById('valorCashout').value = aposta.valorCashout ? aposta.valorCashout.toFixed(2) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
@@ -352,6 +361,7 @@
             const valor = parseFloat(document.getElementById('valorApostado').value);
             const odd = parseFloat(document.getElementById('odd').value);
             const resultado = document.getElementById('resultado').value;
+            const valorCashout = document.getElementById('valorCashout').value ? parseFloat(document.getElementById('valorCashout').value) : null;
             const obs = document.getElementById('observacao').value;
             const data = new Date();
 
@@ -360,14 +370,21 @@
                 return;
             }
 
-            let lucro;
+            if (resultado === 'cashout' && !valorCashout) {
+                alert('Informe o valor recebido no Cashout!');
+                return;
+            }
+
+            let lucro, retorno;
             if (resultado === 'green') {
-                lucro = (valor * odd) - valor;
+                retorno = valor * odd;
+                lucro = retorno - valor;
             } else if (resultado === 'red') {
+                retorno = 0;
                 lucro = -valor;
             } else {
-                // Cashout: retorno de 50% do lucro potencial
-                lucro = ((valor * odd) - valor) * 0.5;
+                retorno = valorCashout;
+                lucro = valorCashout - valor;
             }
 
             if (id) {
@@ -377,7 +394,8 @@
                         ...apostas[indice],
                         valor,
                         odd,
-                        retorno: valor * odd,
+                        valorCashout: resultado === 'cashout' ? valorCashout : null,
+                        retorno,
                         lucro,
                         resultado,
                         obs
@@ -388,7 +406,8 @@
                     id: Date.now(),
                     valor,
                     odd,
-                    retorno: valor * odd,
+                    valorCashout: resultado === 'cashout' ? valorCashout : null,
+                    retorno,
                     lucro,
                     resultado,
                     obs,
@@ -482,7 +501,7 @@
                             <div>
                                 <p class="font-medium">${a.obs || 'Aposta'}</p>
                                 <p class="text-sm text-gray-600">Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${a.valorCashout.toFixed(2).replace('.', ',')}` : ''}</p>
                                 <p class="text-xs text-gray-400">${a.data}</p>
                             </div>
                         </div>
