@@ -15,12 +15,14 @@
                         green: '#34C759',
                         red: '#FF3B30',
                         blue: '#007AFF',
+                        yellow: '#FFCC00',
                         grayText: '#86868B',
                         lightBg: '#F2F2F7',
                         menuBg: '#F8F8F8',
                         menuActive: '#E5E5EA',
                         greenLight: '#E8F5E9',
                         redLight: '#FFEBEE',
+                        yellowLight: '#FFFBEB',
                     },
                     fontFamily: {
                         sf: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
@@ -77,11 +79,12 @@
             }
             .btn-resultado {
                 flex: 1;
-                padding: 12px;
+                padding: 12px 6px;
                 border-radius: 12px;
                 border: 1px solid #E0E0E0;
                 text-align: center;
                 font-weight: 500;
+                font-size: 13px;
                 transition: all 0.2s ease;
                 cursor: pointer;
             }
@@ -94,6 +97,11 @@
                 background-color: #FFEBEE;
                 border-color: #EF9A9A;
                 color: #C62828;
+            }
+            .btn-cashout.active {
+                background-color: #FFFBEB;
+                border-color: #FDE68A;
+                color: #92720E;
             }
             .aposta-item {
                 cursor: pointer;
@@ -117,7 +125,7 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
-        <!-- Cabeçalho mais compacto e centralizado -->
+        <!-- Cabeçalho -->
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <button onclick="abrirModal()" class="btn-header">+</button>
@@ -142,7 +150,7 @@
                 </div>
             </div>
 
-            <!-- Gráfico com quantidades visíveis -->
+            <!-- Gráfico -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
@@ -186,7 +194,7 @@
             </div>
         </div>
 
-        <!-- Menu Inferior igual ao modelo -->
+        <!-- Menu Inferior -->
         <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
             <div class="flex justify-between items-center h-16">
                 <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
@@ -219,9 +227,10 @@
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
-                        <div class="flex gap-3">
-                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Green</div>
-                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Red</div>
+                        <div class="flex gap-2">
+                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Ganha</div>
+                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Perdida</div>
+                            <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                         <input type="hidden" id="resultado" value="">
                     </div>
@@ -231,7 +240,7 @@
                     </div>
                     <div class="flex gap-3 mt-3">
                         <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
-                        <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar Alterações</button>
+                        <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -247,10 +256,10 @@
             grafico = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Green', 'Red'],
+                    labels: ['Ganha', 'Perdida', 'Cashout'],
                     datasets: [{
-                        data: [0, 0],
-                        backgroundColor: ['#34C759', '#FF3B30'],
+                        data: [0, 0, 0],
+                        backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
                         borderWidth: 0
                     }]
                 },
@@ -278,7 +287,9 @@
                         const meta = chart.getDatasetMeta(0);
                         meta.data.forEach((fatia, i) => {
                             const posicao = fatia.tooltipPosition();
-                            ctx.fillText(data.datasets[0].data[i], posicao.x, posicao.y);
+                            if (data.datasets[0].data[i] > 0) {
+                                ctx.fillText(data.datasets[0].data[i], posicao.x, posicao.y);
+                            }
                         });
                     }
                 }]
@@ -306,6 +317,7 @@
             document.getElementById('resultado').value = tipo;
             document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
             document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
+            document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
         }
 
         function abrirModal(aposta = null) {
@@ -344,12 +356,19 @@
             const data = new Date();
 
             if (!resultado) {
-                alert('Selecione o resultado: Green ou Red!');
+                alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
                 return;
             }
 
-            const retornoTotal = valor * odd;
-            const lucro = resultado === 'green' ? retornoTotal - valor : -valor;
+            let lucro;
+            if (resultado === 'green') {
+                lucro = (valor * odd) - valor;
+            } else if (resultado === 'red') {
+                lucro = -valor;
+            } else {
+                // Cashout: retorno de 50% do lucro potencial
+                lucro = ((valor * odd) - valor) * 0.5;
+            }
 
             if (id) {
                 const indice = apostas.findIndex(a => a.id == id);
@@ -358,7 +377,7 @@
                         ...apostas[indice],
                         valor,
                         odd,
-                        retorno: retornoTotal,
+                        retorno: valor * odd,
                         lucro,
                         resultado,
                         obs
@@ -369,7 +388,7 @@
                     id: Date.now(),
                     valor,
                     odd,
-                    retorno: retornoTotal,
+                    retorno: valor * odd,
                     lucro,
                     resultado,
                     obs,
@@ -397,7 +416,7 @@
         function atualizarDados() {
             let totalInvestido = 0;
             let totalLucro = 0;
-            let qtdGreen = 0, qtdRed = 0;
+            let qtdGreen = 0, qtdRed = 0, qtdCashout = 0;
             let balancoDia = 0;
             const hoje = new Date().toLocaleDateString('pt-BR');
             const dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
@@ -406,7 +425,8 @@
                 totalInvestido += a.valor;
                 totalLucro += a.lucro;
                 if (a.resultado === 'green') qtdGreen++;
-                else qtdRed++;
+                else if (a.resultado === 'red') qtdRed++;
+                else qtdCashout++;
                 if (a.data === hoje) balancoDia += a.lucro;
             });
 
@@ -424,7 +444,7 @@
             document.getElementById('tempoTotal').textContent = tempoTexto;
             document.getElementById('totalApostas').textContent = apostas.length;
 
-            grafico.data.datasets[0].data = [qtdGreen, qtdRed];
+            grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
             grafico.update();
 
             atualizarHistorico();
@@ -438,22 +458,37 @@
             }
             lista.innerHTML = '';
             apostas.forEach(a => {
-                const cor = a.resultado === 'green' ? 'text-green' : 'text-red';
-                const icone = a.resultado === 'green' ? 'fa-arrow-up' : 'fa-arrow-down';
+                let cor, corClara, status;
+                if (a.resultado === 'green') {
+                    cor = 'text-green';
+                    corClara = 'bg-green/10';
+                    status = '🟢 Ganha';
+                } else if (a.resultado === 'red') {
+                    cor = 'text-red';
+                    corClara = 'bg-red/10';
+                    status = '🔴 Perdida';
+                } else {
+                    cor = 'text-yellow-600';
+                    corClara = 'bg-yellow/10';
+                    status = '🟡 Cashout';
+                }
+
                 lista.innerHTML += `
                     <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} bg-opacity-10 bg-${cor.replace('text-', '')}/10">
-                                <i class="fa ${icone}"></i>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
+                                <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
                             </div>
                             <div>
                                 <p class="font-medium">${a.obs || 'Aposta'}</p>
-                                <p class="text-xs text-gray-500">${a.data} • Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')} • Odd: ${a.odd.toFixed(2)}</p>
+                                <p class="text-sm text-gray-600">Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')}</p>
+                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)}</p>
+                                <p class="text-xs text-gray-400">${a.data}</p>
                             </div>
                         </div>
                         <div class="text-right">
+                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
                             <p class="font-semibold ${cor}">R$ ${a.lucro.toFixed(2).replace('.', ',')}</p>
-                            <p class="text-xs text-gray-500">${a.resultado.toUpperCase()}</p>
                         </div>
                     </div>`;
             });
