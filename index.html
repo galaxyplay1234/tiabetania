@@ -113,7 +113,6 @@
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-            /* Correção campo de data */
             input[type="date"] {
                 -webkit-appearance: none;
                 appearance: none;
@@ -139,7 +138,6 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
-        <!-- Cabeçalho -->
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
@@ -148,7 +146,6 @@
             </div>
         </header>
 
-        <!-- Página Home -->
         <div id="paginaHome" class="px-6 py-6 space-y-6">
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="flex justify-between items-center mb-3">
@@ -196,7 +193,6 @@
             </div>
         </div>
 
-        <!-- Página Histórico -->
         <div id="paginaHistorico" class="hidden px-6 py-6">
             <h2 class="text-xl font-semibold mb-4">Histórico de Apostas</h2>
             <div id="listaHistorico" class="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
@@ -207,7 +203,6 @@
             </div>
         </div>
 
-        <!-- Menu Inferior -->
         <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
             <div class="flex justify-between items-center h-16">
                 <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
@@ -221,7 +216,6 @@
             </div>
         </nav>
 
-        <!-- Modal Banca -->
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -238,7 +232,6 @@
             </div>
         </div>
 
-        <!-- Modal Aposta -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -247,7 +240,6 @@
                 </div>
                 <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
                     <input type="hidden" id="idAposta" value="">
-                    <!-- CAMPO OCULTO DO RESULTADO ADICIONADO NOVAMENTE -->
                     <input type="hidden" id="resultado" value="">
 
                     <div>
@@ -297,6 +289,22 @@
         let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
+
+        // ✅ Função para pegar data de hoje no formato local (sem erro de fuso)
+        function dataHojeLocal() {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // ✅ Função para converter data para exibição no formato brasileiro
+        function formatarDataExibicao(dataISO) {
+            if (!dataISO) return '';
+            const [ano, mes, dia] = dataISO.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
 
         function formatarParaExibicao(valor) {
             return valor.toFixed(2).replace('.', ',');
@@ -402,7 +410,6 @@
             }
         }
 
-        // Função de seleção dos botões
         function selecionarResultado(tipo) {
             document.getElementById('resultado').value = tipo;
             document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
@@ -414,11 +421,11 @@
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            const hoje = new Date().toISOString().split('T')[0];
 
             const valorApostaInput = document.getElementById('valorApostado');
             const valorCashoutInput = document.getElementById('valorCashout');
             const oddInput = document.getElementById('odd');
+            const dataInput = document.getElementById('dataAposta');
 
             valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
             valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
@@ -429,7 +436,7 @@
                 document.getElementById('idAposta').value = aposta.id;
                 valorApostaInput.value = formatarParaExibicao(aposta.valor);
                 oddInput.value = aposta.odd.toFixed(2);
-                document.getElementById('dataAposta').value = aposta.dataISO || hoje;
+                dataInput.value = aposta.dataISO || dataHojeLocal();
                 document.getElementById('observacao').value = aposta.obs || '';
                 valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
@@ -438,7 +445,7 @@
                 document.getElementById('tituloModal').textContent = 'Nova Aposta';
                 document.getElementById('formAposta').reset();
                 document.getElementById('idAposta').value = '';
-                document.getElementById('dataAposta').value = hoje;
+                dataInput.value = dataHojeLocal();
                 selecionarResultado('');
                 document.getElementById('btnExcluir').classList.add('hidden');
             }
@@ -477,7 +484,9 @@
                 return;
             }
 
-            const dataFormatada = new Date(dataISO).toLocaleDateString('pt-BR');
+            const dataFormatada = formatarDataExibicao(dataISO);
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+
             let lucro, retorno;
             if (resultado === 'green') {
                 retorno = valor * odd;
@@ -493,10 +502,19 @@
             if (id) {
                 const indice = apostas.findIndex(a => a.id == id);
                 if (indice !== -1) {
-                    apostas[indice] = { id: Number(id), valor, odd, dataISO, data: dataFormatada, valorCashout: resultado === 'cashout' ? valorCashout : null, retorno, lucro, resultado, obs, timestamp: new Date(dataISO).getTime() };
+                    apostas[indice] = {
+                        ...apostas[indice],
+                        valor, odd, dataISO, data: dataFormatada,
+                        valorCashout: resultado === 'cashout' ? valorCashout : null,
+                        retorno, lucro, resultado, obs, timestamp
+                    };
                 }
             } else {
-                apostas.unshift({ id: Date.now(), valor, odd, dataISO, data: dataFormatada, valorCashout: resultado === 'cashout' ? valorCashout : null, retorno, lucro, resultado, obs, timestamp: new Date(dataISO).getTime() });
+                apostas.unshift({
+                    id: Date.now(), valor, odd, dataISO, data: dataFormatada,
+                    valorCashout: resultado === 'cashout' ? valorCashout : null,
+                    retorno, lucro, resultado, obs, timestamp
+                });
             }
 
             localStorage.setItem('apostasBetania', JSON.stringify(apostas));
@@ -517,7 +535,7 @@
 
         function atualizarDados() {
             let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
-            const hoje = new Date().toLocaleDateString('pt-BR');
+            const hojeISO = dataHojeLocal();
             const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
 
             apostas.forEach(a => {
@@ -526,7 +544,7 @@
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
                 else qtdCashout++;
-                if (a.data === hoje) balancoDia += a.lucro;
+                if (a.dataISO === hojeISO) balancoDia += a.lucro;
             });
 
             const saldoAtual = bancaInicial + totalLucro;
