@@ -291,6 +291,7 @@
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
 
+        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -532,7 +533,9 @@
             }
         }
 
+        // ✅ CÁLCULO CORRIGIDO DEFINITIVO
         function atualizarDados() {
+            // Recarrega dados do armazenamento
             apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
             bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
 
@@ -540,14 +543,17 @@
             const hojeISO = dataHojeLocal();
             const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
 
+            // Percorre todas as apostas e soma corretamente
             apostas.forEach(a => {
                 totalInvestido += a.valor;
                 totalLucro += a.lucro;
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
                 else qtdCashout++;
-                // ✅ CORREÇÃO: soma o lucro/prejuízo completo do dia
-                if (a.dataISO === hojeISO) balancoDia += a.lucro;
+                // ✅ Aqui soma o lucro/prejuízo COMPLETO do dia
+                if (a.dataISO === hojeISO) {
+                    balancoDia += a.lucro;
+                }
             });
 
             const saldoAtual = bancaInicial + totalLucro;
@@ -558,7 +564,7 @@
             document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
             document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
 
-            // ✅ Mostra cor e valor correto do balanço do dia
+            // ✅ Exibe balanço do dia com valor e cor corretos
             const balancoDiaEl = document.getElementById('balancoDia');
             if (balancoDia !== 0) {
                 balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
