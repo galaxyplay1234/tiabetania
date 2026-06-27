@@ -15,8 +15,10 @@
                         green: '#34C759',
                         red: '#FF3B30',
                         blue: '#007AFF',
-                        grayText: '#8E8E93',
+                        grayText: '#86868B',
                         lightBg: '#F2F2F7',
+                        menuBg: '#F8F8F8',
+                        menuActive: '#E5E5EA',
                     },
                     fontFamily: {
                         sf: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
@@ -53,10 +55,24 @@
             .btn-header:hover {
                 background: rgba(0,0,0,0.08);
             }
+            /* Estilo do menu igual a imagem */
+            .tab-menu {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                width: 100%;
+                height: 100%;
+                border-radius: 14px;
+                transition: background 0.2s ease;
+            }
             .tab-active {
-                background: rgba(0, 122, 255, 0.1);
-                color: #007AFF;
-                border-radius: 12px;
+                background-color: #E5E5EA;
+                color: #000000;
+            }
+            .tab-inactive {
+                color: #86868B;
             }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -147,14 +163,14 @@
             </div>
         </div>
 
-        <!-- Menu Inferior estilo da foto -->
-        <nav class="fixed bottom-4 left-4 right-4 z-40 glass rounded-2xl p-2">
-            <div class="flex justify-around items-center h-16">
-                <button onclick="mudarPagina('home')" id="tabHome" class="tab-active flex flex-col items-center justify-center gap-1 w-1/2 h-full">
+        <!-- Menu Inferior IGUAL AO MODELO -->
+        <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
+            <div class="flex justify-between items-center h-16">
+                <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
                     <i class="fa fa-home text-xl"></i>
                     <span class="text-xs font-medium">Home</span>
                 </button>
-                <button onclick="mudarPagina('historico')" id="tabHistorico" class="flex flex-col items-center justify-center gap-1 w-1/2 h-full text-grayText">
+                <button onclick="mudarPagina('historico')" id="tabHistorico" class="tab-menu tab-inactive">
                     <i class="fa fa-list-alt text-xl"></i>
                     <span class="text-xs font-medium">Histórico</span>
                 </button>
@@ -227,10 +243,19 @@
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
-            document.getElementById('tabHome').classList.toggle('text-grayText', pagina !== 'home');
-            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
-            document.getElementById('tabHistorico').classList.toggle('text-grayText', pagina !== 'historico');
+            
+            // Troca estilo das abas igual ao modelo
+            if (pagina === 'home') {
+                document.getElementById('tabHome').classList.add('tab-active');
+                document.getElementById('tabHome').classList.remove('tab-inactive');
+                document.getElementById('tabHistorico').classList.add('tab-inactive');
+                document.getElementById('tabHistorico').classList.remove('tab-active');
+            } else {
+                document.getElementById('tabHistorico').classList.add('tab-active');
+                document.getElementById('tabHistorico').classList.remove('tab-inactive');
+                document.getElementById('tabHome').classList.add('tab-inactive');
+                document.getElementById('tabHome').classList.remove('tab-active');
+            }
         }
 
         function abrirModal() {
