@@ -113,14 +113,13 @@
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-            /* Correção específica para o campo de data */
+            /* Correção campo de data */
             input[type="date"] {
                 -webkit-appearance: none;
                 appearance: none;
                 background-color: #ffffff;
                 color: #111827;
                 text-align: left;
-                position: relative;
                 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 12px center;
@@ -151,8 +150,6 @@
 
         <!-- Página Home -->
         <div id="paginaHome" class="px-6 py-6 space-y-6">
-
-            <!-- Card com Banca e Saldo -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="flex justify-between items-center mb-3">
                     <p class="text-gray-500 text-base">Banca Inicial</p>
@@ -172,7 +169,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
@@ -180,7 +176,6 @@
                 </div>
             </div>
 
-            <!-- Resumo Geral -->
             <div class="bg-white rounded-2xl p-5 shadow-sm space-y-4">
                 <div>
                     <p class="text-gray-500 text-base">Valor total apostado</p>
@@ -226,7 +221,7 @@
             </div>
         </nav>
 
-        <!-- Modal para definir/alterar Banca -->
+        <!-- Modal Banca -->
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -243,7 +238,7 @@
             </div>
         </div>
 
-        <!-- Modal de Registro/Edição de Aposta -->
+        <!-- Modal Aposta -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
@@ -252,14 +247,19 @@
                 </div>
                 <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
                     <input type="hidden" id="idAposta" value="">
+                    <!-- CAMPO OCULTO DO RESULTADO ADICIONADO NOVAMENTE -->
+                    <input type="hidden" id="resultado" value="">
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
                         <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,00" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
                         <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.75" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
                         <div class="flex gap-2">
@@ -268,20 +268,22 @@
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                     </div>
-                    <!-- Campo de Data corrigido -->
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
                         <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
                     </div>
-                    <!-- Campo aparece apenas quando Cashout for selecionado -->
+
                     <div id="campoValorCashout" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
                         <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 25,30">
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
                         <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
                     </div>
+
                     <div class="flex gap-3 mt-3">
                         <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
                         <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar</button>
@@ -296,7 +298,6 @@
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
 
-        // Funções auxiliares
         function formatarParaExibicao(valor) {
             return valor.toFixed(2).replace('.', ',');
         }
@@ -305,7 +306,6 @@
             return parseFloat(valorTexto.replace(',', '.'));
         }
 
-        // Formatação automática de valores em reais
         function formatarMoeda(input) {
             let valor = input.value.replace(/\D/g, '');
             if (valor === '') { input.value = ''; return; }
@@ -314,7 +314,6 @@
             input.value = valor;
         }
 
-        // Formatação de odd (apenas ponto)
         function formatarOdd(input) {
             let valor = input.value.replace(',', '.').replace(/[^\d.]/g, '');
             const partes = valor.split('.');
@@ -339,10 +338,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { size: 14 } }
-                        },
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
                         tooltip: { enabled: false }
                     }
                 },
@@ -354,13 +350,10 @@
                         ctx.fillStyle = '#FFFFFF';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-
                         const meta = chart.getDatasetMeta(0);
                         meta.data.forEach((fatia, i) => {
-                            const posicao = fatia.tooltipPosition();
-                            if (data.datasets[0].data[i] > 0) {
-                                ctx.fillText(data.datasets[0].data[i], posicao.x, posicao.y);
-                            }
+                            const pos = fatia.tooltipPosition();
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
                         });
                     }
                 }]
@@ -370,7 +363,6 @@
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            
             if (pagina === 'home') {
                 document.getElementById('tabHome').classList.add('tab-active');
                 document.getElementById('tabHome').classList.remove('tab-inactive');
@@ -410,21 +402,20 @@
             }
         }
 
+        // Função de seleção dos botões
         function selecionarResultado(tipo) {
             document.getElementById('resultado').value = tipo;
             document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
             document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
             document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
-            
             document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            
             const hoje = new Date().toISOString().split('T')[0];
-            
+
             const valorApostaInput = document.getElementById('valorApostado');
             const valorCashoutInput = document.getElementById('valorCashout');
             const oddInput = document.getElementById('odd');
@@ -432,7 +423,7 @@
             valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
             valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
             oddInput.oninput = () => formatarOdd(oddInput);
-            
+
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
@@ -473,24 +464,20 @@
                 alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
                 return;
             }
-
             if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
                 alert('Informe um valor válido para o Cashout!');
                 return;
             }
-
             if (!dataISO) {
                 alert('Selecione a data da aposta!');
                 return;
             }
-
             if (isNaN(odd) || odd < 1.01) {
                 alert('Digite uma odd válida (ex: 1.50)!');
                 return;
             }
 
             const dataFormatada = new Date(dataISO).toLocaleDateString('pt-BR');
-
             let lucro, retorno;
             if (resultado === 'green') {
                 retorno = valor * odd;
@@ -506,33 +493,10 @@
             if (id) {
                 const indice = apostas.findIndex(a => a.id == id);
                 if (indice !== -1) {
-                    apostas[indice] = {
-                        ...apostas[indice],
-                        valor,
-                        odd,
-                        dataISO,
-                        data: dataFormatada,
-                        valorCashout: resultado === 'cashout' ? valorCashout : null,
-                        retorno,
-                        lucro,
-                        resultado,
-                        obs
-                    };
+                    apostas[indice] = { id: Number(id), valor, odd, dataISO, data: dataFormatada, valorCashout: resultado === 'cashout' ? valorCashout : null, retorno, lucro, resultado, obs, timestamp: new Date(dataISO).getTime() };
                 }
             } else {
-                apostas.unshift({
-                    id: Date.now(),
-                    valor,
-                    odd,
-                    dataISO,
-                    data: dataFormatada,
-                    valorCashout: resultado === 'cashout' ? valorCashout : null,
-                    retorno,
-                    lucro,
-                    resultado,
-                    obs,
-                    timestamp: new Date(dataISO).getTime()
-                });
+                apostas.unshift({ id: Date.now(), valor, odd, dataISO, data: dataFormatada, valorCashout: resultado === 'cashout' ? valorCashout : null, retorno, lucro, resultado, obs, timestamp: new Date(dataISO).getTime() });
             }
 
             localStorage.setItem('apostasBetania', JSON.stringify(apostas));
@@ -552,10 +516,7 @@
         }
 
         function atualizarDados() {
-            let totalInvestido = 0;
-            let totalLucro = 0;
-            let qtdGreen = 0, qtdRed = 0, qtdCashout = 0;
-            let balancoDia = 0;
+            let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
             const hoje = new Date().toLocaleDateString('pt-BR');
             const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
 
@@ -585,7 +546,6 @@
 
             grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
             grafico.update();
-
             atualizarHistorico();
         }
 
@@ -597,39 +557,27 @@
             }
             lista.innerHTML = '';
             apostas.forEach(a => {
-                let cor, corClara, status;
-                if (a.resultado === 'green') {
-                    cor = 'text-green';
-                    corClara = 'bg-green/10';
-                    status = '🟢 Ganha';
-                } else if (a.resultado === 'red') {
-                    cor = 'text-red';
-                    corClara = 'bg-red/10';
-                    status = '🔴 Perdida';
-                } else {
-                    cor = 'text-yellow-600';
-                    corClara = 'bg-yellow/10';
-                    status = '🟡 Cashout';
-                }
-
+                const cor = a.resultado === 'green' ? 'text-green' : a.resultado === 'red' ? 'text-red' : 'text-yellow-600';
+                const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
+                const status = a.resultado === 'green' ? '🟢 Ganha' : a.resultado === 'red' ? '🔴 Perdida' : '🟡 Cashout';
                 lista.innerHTML += `
-                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
-                                <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">${a.obs || 'Aposta'}</p>
-                                <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(a.valor)}</p>
-                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(a.valorCashout)}` : ''}</p>
-                                <p class="text-xs text-gray-400">${a.data}</p>
-                            </div>
+                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
+                            <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(a.lucro)}</p>
+                        <div>
+                            <p class="font-medium">${a.obs || 'Aposta'}</p>
+                            <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(a.valor)}</p>
+                            <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(a.valorCashout)}` : ''}</p>
+                            <p class="text-xs text-gray-400">${a.data}</p>
                         </div>
-                    </div>`;
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
+                        <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(a.lucro)}</p>
+                    </div>
+                </div>`;
             });
         }
 
