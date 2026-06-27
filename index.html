@@ -12,16 +12,14 @@
             theme: {
                 extend: {
                     colors: {
-                        green: '#2E7D32',
-                        red: '#C62828',
-                        blue: '#2196F3',
-                        dark: '#1C1C1E',
-                        gray: '#8E8E93',
-                        lightGray: '#F2F2F7',
-                        glass: 'rgba(255,255,255,0.25)'
+                        green: '#34C759',
+                        red: '#FF3B30',
+                        blue: '#007AFF',
+                        grayText: '#8E8E93',
+                        lightBg: '#F2F2F7',
                     },
                     fontFamily: {
-                        sf: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Helvetica Neue', 'sans-serif'],
+                        sf: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
                     },
                 }
             }
@@ -36,16 +34,29 @@
                 user-select: none;
             }
             .glass {
-                background: rgba(255,255,255,0.7);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid rgba(255,255,255,0.3);
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             }
-            .glass-dark {
-                background: rgba(28,28,30,0.7);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                border: 1px solid rgba(255,255,255,0.15);
+            .btn-header {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: rgba(0,0,0,0.04);
+                display: grid;
+                place-items: center;
+                font-size: 18px;
+                transition: background 0.2s;
+            }
+            .btn-header:hover {
+                background: rgba(0,0,0,0.08);
+            }
+            .tab-active {
+                background: rgba(0, 122, 255, 0.1);
+                color: #007AFF;
+                border-radius: 12px;
             }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -55,11 +66,12 @@
             overscroll-behavior: none;
             touch-action: pan-x pan-y;
             font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #F2F2F7;
         }
     </style>
 </head>
-<body class="bg-[#F2F2F7] no-select text-gray-900">
-    <div class="max-w-md mx-auto min-h-screen relative pb-24">
+<body class="text-gray-900 no-select">
+    <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
         <!-- Cabeçalho -->
         <header class="sticky top-0 z-30 glass px-6 pt-12 pb-4 flex justify-between items-center">
@@ -69,10 +81,10 @@
                 </div>
                 <h1 class="text-xl font-semibold">Tia Betânia</h1>
             </div>
-            <button onclick="abrirModal()" class="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl">+</button>
+            <button onclick="abrirModal()" class="btn-header">+</button>
         </header>
 
-        <!-- Conteúdo da Página Home -->
+        <!-- Página Home -->
         <div id="paginaHome" class="px-6 py-6 space-y-6">
 
             <!-- Card Saldo Total -->
@@ -107,11 +119,11 @@
                 </div>
                 <div>
                     <p class="text-gray-500 text-base">Balanço total</p>
-                    <p class="text-xl font-semibold text-green" id="balancoTotal">R$ 0,00</p>
+                    <p class="text-xl font-semibold" id="balancoTotal">R$ 0,00</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-base">Rentabilidade total</p>
-                    <p class="text-xl font-semibold text-green" id="rentabilidadeTotal">0,00%</p>
+                    <p class="text-xl font-semibold" id="rentabilidadeTotal">0,00%</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-base">Tempo total</p>
@@ -122,7 +134,6 @@
                     <p class="text-xl font-semibold" id="totalApostas">0</p>
                 </div>
             </div>
-
         </div>
 
         <!-- Página Histórico -->
@@ -136,28 +147,27 @@
             </div>
         </div>
 
-        <!-- Menu Inferior Estilo Liquid Glass -->
-        <nav class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-gray-200/50">
-            <div class="max-w-md mx-auto flex justify-around items-center h-20">
-                <button onclick="mudarPagina('home')" id="btnHome" class="flex flex-col items-center gap-1 text-blue-500">
+        <!-- Menu Inferior estilo da foto -->
+        <nav class="fixed bottom-4 left-4 right-4 z-40 glass rounded-2xl p-2">
+            <div class="flex justify-around items-center h-16">
+                <button onclick="mudarPagina('home')" id="tabHome" class="tab-active flex flex-col items-center justify-center gap-1 w-1/2 h-full">
                     <i class="fa fa-home text-xl"></i>
                     <span class="text-xs font-medium">Home</span>
                 </button>
-                <button onclick="mudarPagina('historico')" id="btnHistorico" class="flex flex-col items-center gap-1 text-gray-500">
+                <button onclick="mudarPagina('historico')" id="tabHistorico" class="flex flex-col items-center justify-center gap-1 w-1/2 h-full text-grayText">
                     <i class="fa fa-list-alt text-xl"></i>
                     <span class="text-xs font-medium">Histórico</span>
                 </button>
             </div>
         </nav>
 
-        <!-- Modal de Registro de Aposta -->
+        <!-- Modal de Registro -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Nova Aposta</h3>
-                    <button onclick="fecharModal()" class="text-gray-500 text-xl"><i class="fa fa-times"></i></button>
+                    <button onclick="fecharModal()" class="btn-header">×</button>
                 </div>
-
                 <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
@@ -179,18 +189,16 @@
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
                         <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
                     </div>
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Aposta</button>
+                    <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Aposta</button>
                 </form>
             </div>
         </div>
-
     </div>
 
     <script>
         let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
         let grafico;
 
-        // Inicializa gráfico
         function iniciarGrafico() {
             const ctx = document.getElementById('graficoResultados').getContext('2d');
             grafico = new Chart(ctx, {
@@ -199,7 +207,7 @@
                     labels: ['Green', 'Red'],
                     datasets: [{
                         data: [0, 0],
-                        backgroundColor: ['#2E7D32', '#C62828'],
+                        backgroundColor: ['#34C759', '#FF3B30'],
                         borderWidth: 0
                     }]
                 },
@@ -216,17 +224,15 @@
             });
         }
 
-        // Mudar página
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            document.getElementById('btnHome').classList.toggle('text-blue-500', pagina === 'home');
-            document.getElementById('btnHome').classList.toggle('text-gray-500', pagina !== 'home');
-            document.getElementById('btnHistorico').classList.toggle('text-blue-500', pagina === 'historico');
-            document.getElementById('btnHistorico').classList.toggle('text-gray-500', pagina !== 'historico');
+            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
+            document.getElementById('tabHome').classList.toggle('text-grayText', pagina !== 'home');
+            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
+            document.getElementById('tabHistorico').classList.toggle('text-grayText', pagina !== 'historico');
         }
 
-        // Abrir / Fechar modal
         function abrirModal() {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -237,7 +243,6 @@
             document.getElementById('formAposta').reset();
         }
 
-        // Salvar aposta
         function salvarAposta(e) {
             e.preventDefault();
             const valor = parseFloat(document.getElementById('valorApostado').value);
@@ -263,14 +268,13 @@
             atualizarDados();
         }
 
-        // Atualizar todos os dados
         function atualizarDados() {
             let totalInvestido = 0;
             let totalLucro = 0;
             let qtdGreen = 0, qtdRed = 0;
             let balancoDia = 0;
             const hoje = new Date().toLocaleDateString('pt-BR');
-            let dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
+            const dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
 
             apostas.forEach(a => {
                 totalInvestido += a.valor;
@@ -284,22 +288,19 @@
             const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
             const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
-            // Atualizar valores
             document.getElementById('saldoTotal').textContent = totalLucro.toFixed(2).replace('.', ',');
             document.getElementById('balancoDia').textContent = balancoDia.toFixed(2).replace('.', ',');
             document.getElementById('rentabilidadeDia').textContent = balancoDia !== 0 ? `${((balancoDia / (totalInvestido || 1)) * 100).toFixed(2)}%` : '--';
             document.getElementById('valorInvestido').textContent = totalInvestido.toFixed(2).replace('.', ',');
             document.getElementById('balancoTotal').textContent = `R$ ${totalLucro.toFixed(2).replace('.', ',')}`;
-            document.getElementById('balancoTotal').className = totalLucro >= 0 ? 'text-xl font-semibold text-green' : 'text-xl font-semibold text-red';
+            document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
             document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
             document.getElementById('tempoTotal').textContent = tempoTexto;
             document.getElementById('totalApostas').textContent = apostas.length;
 
-            // Atualizar gráfico
             grafico.data.datasets[0].data = [qtdGreen, qtdRed];
             grafico.update();
 
-            // Atualizar histórico
             atualizarHistorico();
         }
 
@@ -332,12 +333,6 @@
             });
         }
 
-        // Fechar modal ao clicar fora
-        document.getElementById('modalAposta').addEventListener('click', e => {
-            if (e.target === this) fecharModal();
-        });
-
-        // Iniciar ao carregar
         window.onload = () => {
             iniciarGrafico();
             atualizarDados();
