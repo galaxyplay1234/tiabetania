@@ -42,20 +42,21 @@
                 border: 1px solid rgba(0, 0, 0, 0.06);
                 box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             }
+            /* Botão + maior e com fundo redondo */
             .btn-header {
-                width: 36px;
-                height: 36px;
+                width: 42px;
+                height: 42px;
                 border-radius: 50%;
-                background: rgba(0,0,0,0.04);
+                background: rgba(0, 0, 0, 0.06);
                 display: grid;
                 place-items: center;
-                font-size: 18px;
-                transition: background 0.2s;
+                font-size: 22px;
+                font-weight: 500;
+                transition: background 0.2s ease;
             }
             .btn-header:hover {
-                background: rgba(0,0,0,0.08);
+                background: rgba(0, 0, 0, 0.1);
             }
-            /* Estilo do menu igual a imagem */
             .tab-menu {
                 display: flex;
                 flex-direction: column;
@@ -89,14 +90,9 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
-        <!-- Cabeçalho -->
+        <!-- Cabeçalho ajustado -->
         <header class="sticky top-0 z-30 glass px-6 pt-12 pb-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center text-white font-bold">
-                    TB
-                </div>
-                <h1 class="text-xl font-semibold">Tia Betânia</h1>
-            </div>
+            <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <button onclick="abrirModal()" class="btn-header">+</button>
         </header>
 
@@ -163,7 +159,7 @@
             </div>
         </div>
 
-        <!-- Menu Inferior IGUAL AO MODELO -->
+        <!-- Menu Inferior igual ao modelo -->
         <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
             <div class="flex justify-between items-center h-16">
                 <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
@@ -244,7 +240,6 @@
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
             
-            // Troca estilo das abas igual ao modelo
             if (pagina === 'home') {
                 document.getElementById('tabHome').classList.add('tab-active');
                 document.getElementById('tabHome').classList.remove('tab-inactive');
