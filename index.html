@@ -239,11 +239,11 @@
                     <input type="hidden" id="idAposta" value="">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
-                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,45" required>
+                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,00" required>
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
-                        <input type="number" step="0.01" min="1.01" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.50" required>
+                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.75" required>
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
@@ -253,7 +253,7 @@
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                     </div>
-                    <!-- Campo de Data -->
+                    <!-- Campo de Data corrigido -->
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
                         <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
@@ -281,13 +281,29 @@
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
 
-        // Funções auxiliares para formato de valores
+        // Funções auxiliares
         function formatarParaExibicao(valor) {
             return valor.toFixed(2).replace('.', ',');
         }
 
         function converterParaNumero(valorTexto) {
             return parseFloat(valorTexto.replace(',', '.'));
+        }
+
+        // Formatação automática de valores em reais
+        function formatarMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = (valor / 100).toFixed(2) + '';
+            valor = valor.replace('.', ',');
+            input.value = valor;
+        }
+
+        // Formatação de odd (apenas ponto)
+        function formatarOdd(input) {
+            let valor = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+            const partes = valor.split('.');
+            if (partes.length > 2) valor = partes[0] + '.' + partes[1];
+            input.value = valor;
         }
 
         function iniciarGrafico() {
@@ -355,7 +371,9 @@
         function abrirModalBanca() {
             document.getElementById('modalBanca').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('inputBanca').value = formatarParaExibicao(bancaInicial);
+            const input = document.getElementById('inputBanca');
+            input.value = formatarParaExibicao(bancaInicial);
+            input.oninput = () => formatarMoeda(input);
         }
 
         function fecharModalBanca() {
@@ -391,14 +409,22 @@
             
             const hoje = new Date().toISOString().split('T')[0];
             
+            const valorApostaInput = document.getElementById('valorApostado');
+            const valorCashoutInput = document.getElementById('valorCashout');
+            const oddInput = document.getElementById('odd');
+
+            valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
+            valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
+            oddInput.oninput = () => formatarOdd(oddInput);
+            
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
-                document.getElementById('valorApostado').value = formatarParaExibicao(aposta.valor);
-                document.getElementById('odd').value = aposta.odd.toFixed(2);
+                valorApostaInput.value = formatarParaExibicao(aposta.valor);
+                oddInput.value = aposta.odd.toFixed(2);
                 document.getElementById('dataAposta').value = aposta.dataISO || hoje;
                 document.getElementById('observacao').value = aposta.obs || '';
-                document.getElementById('valorCashout').value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
+                valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
@@ -439,6 +465,11 @@
 
             if (!dataISO) {
                 alert('Selecione a data da aposta!');
+                return;
+            }
+
+            if (isNaN(odd) || odd < 1.01) {
+                alert('Digite uma odd válida (ex: 1.50)!');
                 return;
             }
 
