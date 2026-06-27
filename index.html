@@ -7,6 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <!-- Firebase SDK - Versão modular com a sua configuração -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        // 👇 SUA CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
+            authDomain: "tiabetania.firebaseapp.com",
+            projectId: "tiabetania",
+            storageBucket: "tiabetania.firebasestorage.app",
+            messagingSenderId: "230400218883",
+            appId: "1:230400218883:web:de615fa4e9ec521be77b36",
+            measurementId: "G-M01M8ZYK9D"
+        };
+
+        // Inicializa o Firebase e o Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Disponibiliza o banco para o resto do código
+        window.db = db;
+        window.collection = collection;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.getDocs = getDocs;
+        window.addDoc = addDoc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.query = query;
+        window.orderBy = orderBy;
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -287,11 +322,10 @@
     </div>
 
     <script>
-        let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
-        let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
+        let apostas = [];
+        let bancaInicial = 0;
         let grafico;
 
-        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -307,11 +341,11 @@
         }
 
         function formatarParaExibicao(valor) {
-            return valor.toFixed(2).replace('.', ',');
+            return parseFloat(valor || 0).toFixed(2).replace('.', ',');
         }
 
         function converterParaNumero(valorTexto) {
-            return parseFloat(valorTexto.replace(',', '.'));
+            return parseFloat(valorTexto.replace(',', '.')) || 0;
         }
 
         function formatarMoeda(input) {
@@ -345,46 +379,25 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '65%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
-                        tooltip: { enabled: false }
-                    }
-                },
-                plugins: [{
-                    id: 'textoQuantidade',
-                    afterDatasetsDraw: function(chart) {
-                        const { ctx, data } = chart;
-                        ctx.font = 'bold 16px SF Pro Display';
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        const meta = chart.getDatasetMeta(0);
-                        meta.data.forEach((fatia, i) => {
-                            const pos = fatia.tooltipPosition();
-                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
-                        });
-                    }
-                }]
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } } }
+                }
             });
         }
 
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            if (pagina === 'home') {
-                document.getElementById('tabHome').classList.add('tab-active');
-                document.getElementById('tabHome').classList.remove('tab-inactive');
-                document.getElementById('tabHistorico').classList.add('tab-inactive');
-                document.getElementById('tabHistorico').classList.remove('tab-active');
-            } else {
-                document.getElementById('tabHistorico').classList.add('tab-active');
-                document.getElementById('tabHistorico').classList.remove('tab-inactive');
-                document.getElementById('tabHome').classList.add('tab-inactive');
-                document.getElementById('tabHome').classList.remove('tab-active');
-            }
+            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
+            document.getElementById('tabHome').classList.toggle('tab-inactive', pagina !== 'home');
+            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
+            document.getElementById('tabHistorico').classList.toggle('tab-inactive', pagina !== 'historico');
         }
 
-        function abrirModalBanca() {
+        // 📥 Buscar banca no Firestore
+        async function abrirModalBanca() {
+            const docRef = doc(db, 'configuracoes', 'banca');
+            const docSnap = await getDoc(docRef);
+            bancaInicial = docSnap.exists() ? docSnap.data().valor : 0;
             document.getElementById('modalBanca').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             const input = document.getElementById('inputBanca');
@@ -397,12 +410,12 @@
             document.body.style.overflow = 'auto';
         }
 
-        function salvarBanca(e) {
+        // 💾 Salvar banca no Firestore
+        async function salvarBanca(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('inputBanca').value);
             if (!isNaN(valor) && valor >= 0) {
-                bancaInicial = valor;
-                localStorage.setItem('bancaInicial', valor);
+                await setDoc(doc(db, 'configuracoes', 'banca'), { valor });
                 fecharModalBanca();
                 atualizarDados();
             } else {
@@ -418,10 +431,9 @@
             document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
-        function abrirModal(aposta = null) {
+        async function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-
             const valorApostaInput = document.getElementById('valorApostado');
             const valorCashoutInput = document.getElementById('valorCashout');
             const oddInput = document.getElementById('odd');
@@ -436,7 +448,7 @@
                 document.getElementById('idAposta').value = aposta.id;
                 valorApostaInput.value = formatarParaExibicao(aposta.valor);
                 oddInput.value = aposta.odd.toFixed(2);
-                dataInput.value = aposta.dataISO || dataHojeLocal();
+                dataInput.value = aposta.dataISO;
                 document.getElementById('observacao').value = aposta.obs || '';
                 valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
@@ -456,7 +468,8 @@
             document.body.style.overflow = 'auto';
         }
 
-        function salvarAposta(e) {
+        // 💾 Salvar/editar aposta no Firestore
+        async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
             const valor = converterParaNumero(document.getElementById('valorApostado').value);
@@ -467,127 +480,87 @@
             const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
             const obs = document.getElementById('observacao').value;
 
-            if (!resultado) {
-                alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
-                return;
-            }
-            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
-                alert('Informe um valor válido para o Cashout!');
-                return;
-            }
-            if (!dataISO) {
-                alert('Selecione a data da aposta!');
-                return;
-            }
-            if (isNaN(odd) || odd < 1.01) {
-                alert('Digite uma odd válida (ex: 1.50)!');
-                return;
-            }
+            if (!resultado) return alert('Selecione o resultado!');
+            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) return alert('Informe o valor do cashout!');
+            if (!dataISO) return alert('Selecione a data!');
+            if (isNaN(odd) || odd < 1.01) return alert('Odd inválida!');
 
-            const dataFormatada = formatarDataExibicao(dataISO);
-            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+            let retorno, lucro;
+            if (resultado === 'green') { retorno = valor * odd; lucro = retorno - valor; }
+            else if (resultado === 'red') { retorno = 0; lucro = -valor; }
+            else { retorno = valorCashout; lucro = valorCashout - valor; }
 
-            let lucro, retorno;
-            if (resultado === 'green') {
-                retorno = valor * odd;
-                lucro = retorno - valor;
-            } else if (resultado === 'red') {
-                retorno = 0;
-                lucro = -valor;
-            } else {
-                retorno = valorCashout;
-                lucro = valorCashout - valor;
-            }
+            const dados = {
+                valor,
+                odd,
+                dataISO,
+                data: formatarDataExibicao(dataISO),
+                valorCashout,
+                retorno,
+                lucro,
+                resultado,
+                obs,
+                timestamp: new Date(dataISO)
+            };
 
             if (id) {
-                const indice = apostas.findIndex(a => a.id == id);
-                if (indice !== -1) {
-                    apostas[indice] = {
-                        ...apostas[indice],
-                        valor, odd, dataISO, data: dataFormatada,
-                        valorCashout: resultado === 'cashout' ? valorCashout : null,
-                        retorno, lucro, resultado, obs, timestamp
-                    };
-                }
+                await updateDoc(doc(db, 'apostas', id), dados);
             } else {
-                apostas.unshift({
-                    id: Date.now(), valor, odd, dataISO, data: dataFormatada,
-                    valorCashout: resultado === 'cashout' ? valorCashout : null,
-                    retorno, lucro, resultado, obs, timestamp
-                });
+                await addDoc(collection(db, 'apostas'), dados);
             }
 
-            localStorage.setItem('apostasBetania', JSON.stringify(apostas));
             fecharModal();
             atualizarDados();
         }
 
-        function excluirAposta() {
+        // 🗑️ Excluir aposta
+        async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
-            if (!id) return;
-            if (confirm('Deseja excluir esta aposta?')) {
-                apostas = apostas.filter(a => a.id != id);
-                localStorage.setItem('apostasBetania', JSON.stringify(apostas));
-                fecharModal();
-                atualizarDados();
-            }
+            if (!id || !confirm('Deseja excluir esta aposta?')) return;
+            await deleteDoc(doc(db, 'apostas', id));
+            fecharModal();
+            atualizarDados();
         }
 
-        // ✅ CÁLCULO CORRIGIDO DEFINITIVO
-        function atualizarDados() {
-            // Recarrega dados do armazenamento
-            apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
-            bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
+        // 📊 Atualizar todos os dados
+        async function atualizarDados() {
+            const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
+            bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+
+            const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+            const snapshot = await getDocs(q);
+            apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
             const hojeISO = dataHojeLocal();
             let dataInicial = null;
 
-            // Percorre todas as apostas e soma corretamente
             apostas.forEach(a => {
-                totalInvestido += a.valor;
-                totalLucro += a.lucro;
+                totalInvestido += a.valor || 0;
+                totalLucro += a.lucro || 0;
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
-                else qtdCashout++;
-                // ✅ Soma lucro/prejuízo COMPLETO do dia
-                if (a.dataISO === hojeISO) {
-                    balancoDia += a.lucro;
-                }
-                // ✅ Pega a data mais antiga registrada
-                const dataAtual = new Date(a.timestamp);
-                if (!dataInicial || dataAtual < dataInicial) {
-                    dataInicial = dataAtual;
-                }
+                else if (a.resultado === 'cashout') qtdCashout++;
+                if (a.dataISO === hojeISO) balancoDia += a.lucro || 0;
+                const dataAtual = new Date(a.dataISO);
+                if (!dataInicial || dataAtual < dataInicial) dataInicial = dataAtual;
             });
 
-            // ✅ Cálculo correto dos dias
             let diferencaDias = 0;
             if (apostas.length > 0 && dataInicial) {
                 const hoje = new Date();
                 const diferencaMs = hoje - dataInicial;
-                diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1; // +1 para contar o dia inicial
+                diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
             }
 
             const saldoAtual = bancaInicial + totalLucro;
             const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
-            
-            // ✅ Texto correto do tempo
-            let tempoTexto;
-            if (diferencaDias === 1) {
-                tempoTexto = '1 dia';
-            } else if (diferencaDias < 30) {
-                tempoTexto = `${diferencaDias} dias`;
-            } else if (diferencaDias < 60) {
-                tempoTexto = '1 mês';
-            } else {
-                tempoTexto = `${Math.floor(diferencaDias / 30)} meses`;
-            }
+
+            let tempoTexto = diferencaDias === 1 ? '1 dia' : diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? '1 mês' : `${Math.floor(diferencaDias / 30)} meses`;
 
             document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
             document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
 
-            // ✅ Exibe balanço do dia com valor e cor corretos
             const balancoDiaEl = document.getElementById('balancoDia');
             if (balancoDia !== 0) {
                 balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
@@ -624,7 +597,7 @@
                 const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
                 const status = a.resultado === 'green' ? '🟢 Ganha' : a.resultado === 'red' ? '🔴 Perdida' : '🟡 Cashout';
                 lista.innerHTML += `
-                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})'>
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
                             <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
