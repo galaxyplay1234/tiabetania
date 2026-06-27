@@ -95,6 +95,13 @@
                 border-color: #EF9A9A;
                 color: #C62828;
             }
+            .aposta-item {
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .aposta-item:hover {
+                background-color: #F9F9F9;
+            }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         }
@@ -135,11 +142,11 @@
                 </div>
             </div>
 
-            <!-- Gráfico -->
+            <!-- Gráfico com quantidades visíveis -->
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
-                    <p class="text-gray-500 text-sm mt-4">Gráfico com balanço de apostas</p>
+                    <p class="text-gray-500 text-sm mt-4">Quantidade de Green e Red</p>
                 </div>
             </div>
 
@@ -193,14 +200,15 @@
             </div>
         </nav>
 
-        <!-- Modal de Registro com alterações -->
+        <!-- Modal de Registro/Edição -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-xl font-semibold">Nova Aposta</h3>
+                    <h3 id="tituloModal" class="text-xl font-semibold">Nova Aposta</h3>
                     <button onclick="fecharModal()" class="btn-header">×</button>
                 </div>
                 <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
+                    <input type="hidden" id="idAposta" value="">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
                         <input type="number" step="0.01" min="0.10" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 100,00" required>
@@ -221,7 +229,10 @@
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
                         <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
                     </div>
-                    <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Aposta</button>
+                    <div class="flex gap-3 mt-3">
+                        <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
+                        <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar Alterações</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -246,13 +257,31 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '65%',
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: { font: { size: 14 } }
-                        }
+                        },
+                        tooltip: { enabled: false }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'textoQuantidade',
+                    afterDatasetsDraw: function(chart) {
+                        const { ctx, data } = chart;
+                        ctx.font = 'bold 16px SF Pro Display';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((fatia, i) => {
+                            const posicao = fatia.tooltipPosition();
+                            ctx.fillText(data.datasets[0].data[i], posicao.x, posicao.y);
+                        });
+                    }
+                }]
             });
         }
 
@@ -279,11 +308,25 @@
             document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
         }
 
-        function abrirModal() {
+        function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('formAposta').reset();
-            selecionarResultado('');
+            
+            if (aposta) {
+                document.getElementById('tituloModal').textContent = 'Editar Aposta';
+                document.getElementById('idAposta').value = aposta.id;
+                document.getElementById('valorApostado').value = aposta.valor.toFixed(2);
+                document.getElementById('odd').value = aposta.odd.toFixed(2);
+                document.getElementById('observacao').value = aposta.obs || '';
+                selecionarResultado(aposta.resultado);
+                document.getElementById('btnExcluir').classList.remove('hidden');
+            } else {
+                document.getElementById('tituloModal').textContent = 'Nova Aposta';
+                document.getElementById('formAposta').reset();
+                document.getElementById('idAposta').value = '';
+                selecionarResultado('');
+                document.getElementById('btnExcluir').classList.add('hidden');
+            }
         }
 
         function fecharModal() {
@@ -293,6 +336,7 @@
 
         function salvarAposta(e) {
             e.preventDefault();
+            const id = document.getElementById('idAposta').value;
             const valor = parseFloat(document.getElementById('valorApostado').value);
             const odd = parseFloat(document.getElementById('odd').value);
             const resultado = document.getElementById('resultado').value;
@@ -307,22 +351,47 @@
             const retornoTotal = valor * odd;
             const lucro = resultado === 'green' ? retornoTotal - valor : -valor;
 
-            const nova = {
-                id: Date.now(),
-                valor,
-                odd,
-                retorno: retornoTotal,
-                lucro,
-                resultado,
-                obs,
-                data: data.toLocaleDateString('pt-BR'),
-                timestamp: data.getTime()
-            };
+            if (id) {
+                const indice = apostas.findIndex(a => a.id == id);
+                if (indice !== -1) {
+                    apostas[indice] = {
+                        ...apostas[indice],
+                        valor,
+                        odd,
+                        retorno: retornoTotal,
+                        lucro,
+                        resultado,
+                        obs
+                    };
+                }
+            } else {
+                apostas.unshift({
+                    id: Date.now(),
+                    valor,
+                    odd,
+                    retorno: retornoTotal,
+                    lucro,
+                    resultado,
+                    obs,
+                    data: data.toLocaleDateString('pt-BR'),
+                    timestamp: data.getTime()
+                });
+            }
 
-            apostas.unshift(nova);
             localStorage.setItem('apostasBetania', JSON.stringify(apostas));
             fecharModal();
             atualizarDados();
+        }
+
+        function excluirAposta() {
+            const id = document.getElementById('idAposta').value;
+            if (!id) return;
+            if (confirm('Deseja excluir esta aposta?')) {
+                apostas = apostas.filter(a => a.id != id);
+                localStorage.setItem('apostasBetania', JSON.stringify(apostas));
+                fecharModal();
+                atualizarDados();
+            }
         }
 
         function atualizarDados() {
@@ -372,7 +441,7 @@
                 const cor = a.resultado === 'green' ? 'text-green' : 'text-red';
                 const icone = a.resultado === 'green' ? 'fa-arrow-up' : 'fa-arrow-down';
                 lista.innerHTML += `
-                    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} bg-opacity-10 bg-${cor.replace('text-', '')}/10">
                                 <i class="fa ${icone}"></i>
