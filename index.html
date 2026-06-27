@@ -221,7 +221,7 @@
                 <form onsubmit="salvarBanca(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor da Banca (R$)</label>
-                        <input type="number" step="0.01" min="0" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
+                        <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
                     </div>
                     <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Banca</button>
                 </form>
@@ -239,7 +239,7 @@
                     <input type="hidden" id="idAposta" value="">
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
-                        <input type="number" step="0.01" min="0.10" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 100,00" required>
+                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,45" required>
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
@@ -252,12 +252,16 @@
                             <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Perdida</div>
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
-                        <input type="hidden" id="resultado" value="">
+                    </div>
+                    <!-- Campo de Data -->
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
+                        <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
                     </div>
                     <!-- Campo aparece apenas quando Cashout for selecionado -->
                     <div id="campoValorCashout" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
-                        <input type="number" step="0.01" min="0" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 125,00">
+                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 25,30">
                     </div>
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
@@ -276,6 +280,15 @@
         let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
+
+        // Funções auxiliares para formato de valores
+        function formatarParaExibicao(valor) {
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        function converterParaNumero(valorTexto) {
+            return parseFloat(valorTexto.replace(',', '.'));
+        }
 
         function iniciarGrafico() {
             const ctx = document.getElementById('graficoResultados').getContext('2d');
@@ -342,7 +355,7 @@
         function abrirModalBanca() {
             document.getElementById('modalBanca').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('inputBanca').value = bancaInicial.toFixed(2);
+            document.getElementById('inputBanca').value = formatarParaExibicao(bancaInicial);
         }
 
         function fecharModalBanca() {
@@ -352,11 +365,15 @@
 
         function salvarBanca(e) {
             e.preventDefault();
-            const valor = parseFloat(document.getElementById('inputBanca').value);
-            bancaInicial = valor;
-            localStorage.setItem('bancaInicial', valor);
-            fecharModalBanca();
-            atualizarDados();
+            const valor = converterParaNumero(document.getElementById('inputBanca').value);
+            if (!isNaN(valor) && valor >= 0) {
+                bancaInicial = valor;
+                localStorage.setItem('bancaInicial', valor);
+                fecharModalBanca();
+                atualizarDados();
+            } else {
+                alert('Digite um valor válido!');
+            }
         }
 
         function selecionarResultado(tipo) {
@@ -372,19 +389,23 @@
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             
+            const hoje = new Date().toISOString().split('T')[0];
+            
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
-                document.getElementById('valorApostado').value = aposta.valor.toFixed(2);
+                document.getElementById('valorApostado').value = formatarParaExibicao(aposta.valor);
                 document.getElementById('odd').value = aposta.odd.toFixed(2);
+                document.getElementById('dataAposta').value = aposta.dataISO || hoje;
                 document.getElementById('observacao').value = aposta.obs || '';
-                document.getElementById('valorCashout').value = aposta.valorCashout ? aposta.valorCashout.toFixed(2) : '';
+                document.getElementById('valorCashout').value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
                 document.getElementById('tituloModal').textContent = 'Nova Aposta';
                 document.getElementById('formAposta').reset();
                 document.getElementById('idAposta').value = '';
+                document.getElementById('dataAposta').value = hoje;
                 selecionarResultado('');
                 document.getElementById('btnExcluir').classList.add('hidden');
             }
@@ -398,22 +419,30 @@
         function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
-            const valor = parseFloat(document.getElementById('valorApostado').value);
+            const valor = converterParaNumero(document.getElementById('valorApostado').value);
             const odd = parseFloat(document.getElementById('odd').value);
+            const dataISO = document.getElementById('dataAposta').value;
             const resultado = document.getElementById('resultado').value;
-            const valorCashout = document.getElementById('valorCashout').value ? parseFloat(document.getElementById('valorCashout').value) : null;
+            const valorCashoutTexto = document.getElementById('valorCashout').value.trim();
+            const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
             const obs = document.getElementById('observacao').value;
-            const data = new Date();
 
             if (!resultado) {
                 alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
                 return;
             }
 
-            if (resultado === 'cashout' && !valorCashout) {
-                alert('Informe o valor recebido no Cashout!');
+            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
+                alert('Informe um valor válido para o Cashout!');
                 return;
             }
+
+            if (!dataISO) {
+                alert('Selecione a data da aposta!');
+                return;
+            }
+
+            const dataFormatada = new Date(dataISO).toLocaleDateString('pt-BR');
 
             let lucro, retorno;
             if (resultado === 'green') {
@@ -434,6 +463,8 @@
                         ...apostas[indice],
                         valor,
                         odd,
+                        dataISO,
+                        data: dataFormatada,
                         valorCashout: resultado === 'cashout' ? valorCashout : null,
                         retorno,
                         lucro,
@@ -446,13 +477,14 @@
                     id: Date.now(),
                     valor,
                     odd,
+                    dataISO,
+                    data: dataFormatada,
                     valorCashout: resultado === 'cashout' ? valorCashout : null,
                     retorno,
                     lucro,
                     resultado,
                     obs,
-                    data: data.toLocaleDateString('pt-BR'),
-                    timestamp: data.getTime()
+                    timestamp: new Date(dataISO).getTime()
                 });
             }
 
@@ -478,7 +510,7 @@
             let qtdGreen = 0, qtdRed = 0, qtdCashout = 0;
             let balancoDia = 0;
             const hoje = new Date().toLocaleDateString('pt-BR');
-            const dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
+            const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
 
             apostas.forEach(a => {
                 totalInvestido += a.valor;
@@ -490,16 +522,16 @@
             });
 
             const saldoAtual = bancaInicial + totalLucro;
-            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2) : '0,00';
+            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
             const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
             const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
-            document.getElementById('bancaInicial').textContent = bancaInicial.toFixed(2).replace('.', ',');
-            document.getElementById('saldoTotal').textContent = saldoAtual.toFixed(2).replace('.', ',');
-            document.getElementById('balancoDia').textContent = balancoDia.toFixed(2).replace('.', ',');
+            document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
+            document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+            document.getElementById('balancoDia').textContent = balancoDia !== 0 ? formatarParaExibicao(balancoDia) : '--';
             document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
-            document.getElementById('valorInvestido').textContent = totalInvestido.toFixed(2).replace('.', ',');
-            document.getElementById('balancoTotal').textContent = `R$ ${totalLucro.toFixed(2).replace('.', ',')}`;
+            document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
+            document.getElementById('balancoTotal').textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
             document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
             document.getElementById('tempoTotal').textContent = tempoTexto;
             document.getElementById('totalApostas').textContent = apostas.length;
@@ -541,14 +573,14 @@
                             </div>
                             <div>
                                 <p class="font-medium">${a.obs || 'Aposta'}</p>
-                                <p class="text-sm text-gray-600">Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')}</p>
-                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${a.valorCashout.toFixed(2).replace('.', ',')}` : ''}</p>
+                                <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(a.valor)}</p>
+                                <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(a.valorCashout)}` : ''}</p>
                                 <p class="text-xs text-gray-400">${a.data}</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                            <p class="font-semibold ${cor}">R$ ${a.lucro.toFixed(2).replace('.', ',')}</p>
+                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(a.lucro)}</p>
                         </div>
                     </div>`;
             });
