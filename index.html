@@ -8,12 +8,12 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 
-    <!-- Firebase SDK - Versão modular com a sua configuração -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // 👇 SUA CONFIGURAÇÃO DO FIREBASE
+        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
             authDomain: "tiabetania.firebaseapp.com",
@@ -24,13 +24,12 @@
             measurementId: "G-M01M8ZYK9D"
         };
 
-        // Inicializa o Firebase e o Firestore
+        // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Disponibiliza o banco para o resto do código
+        // Disponibiliza para o resto do código
         window.db = db;
-        window.collection = collection;
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
@@ -38,6 +37,7 @@
         window.addDoc = addDoc;
         window.updateDoc = updateDoc;
         window.deleteDoc = deleteDoc;
+        window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
     </script>
@@ -326,6 +326,7 @@
         let bancaInicial = 0;
         let grafico;
 
+        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -341,7 +342,7 @@
         }
 
         function formatarParaExibicao(valor) {
-            return parseFloat(valor || 0).toFixed(2).replace('.', ',');
+            return (valor || 0).toFixed(2).replace('.', ',');
         }
 
         function converterParaNumero(valorTexto) {
@@ -379,21 +380,46 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '65%',
-                    plugins: { legend: { position: 'bottom', labels: { font: { size: 14 } } } }
-                }
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
+                        tooltip: { enabled: false }
+                    }
+                },
+                plugins: [{
+                    id: 'textoQuantidade',
+                    afterDatasetsDraw: function(chart) {
+                        const { ctx, data } = chart;
+                        ctx.font = 'bold 16px SF Pro Display';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((fatia, i) => {
+                            const pos = fatia.tooltipPosition();
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
+                        });
+                    }
+                }]
             });
         }
 
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
-            document.getElementById('tabHome').classList.toggle('tab-inactive', pagina !== 'home');
-            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
-            document.getElementById('tabHistorico').classList.toggle('tab-inactive', pagina !== 'historico');
+            if (pagina === 'home') {
+                document.getElementById('tabHome').classList.add('tab-active');
+                document.getElementById('tabHome').classList.remove('tab-inactive');
+                document.getElementById('tabHistorico').classList.add('tab-inactive');
+                document.getElementById('tabHistorico').classList.remove('tab-active');
+            } else {
+                document.getElementById('tabHistorico').classList.add('tab-active');
+                document.getElementById('tabHistorico').classList.remove('tab-inactive');
+                document.getElementById('tabHome').classList.add('tab-inactive');
+                document.getElementById('tabHome').classList.remove('tab-active');
+            }
         }
 
-        // 📥 Buscar banca no Firestore
+        // 📥 Buscar banca do Firebase
         async function abrirModalBanca() {
             const docRef = doc(db, 'configuracoes', 'banca');
             const docSnap = await getDoc(docRef);
@@ -410,7 +436,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 💾 Salvar banca no Firestore
+        // 💾 Salvar banca no Firebase
         async function salvarBanca(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('inputBanca').value);
@@ -431,9 +457,10 @@
             document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
-        async function abrirModal(aposta = null) {
+        function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
+
             const valorApostaInput = document.getElementById('valorApostado');
             const valorCashoutInput = document.getElementById('valorCashout');
             const oddInput = document.getElementById('odd');
@@ -448,7 +475,7 @@
                 document.getElementById('idAposta').value = aposta.id;
                 valorApostaInput.value = formatarParaExibicao(aposta.valor);
                 oddInput.value = aposta.odd.toFixed(2);
-                dataInput.value = aposta.dataISO;
+                dataInput.value = aposta.dataISO || dataHojeLocal();
                 document.getElementById('observacao').value = aposta.obs || '';
                 valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
@@ -468,7 +495,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 💾 Salvar/editar aposta no Firestore
+        // 💾 Salvar/Editar aposta no Firebase
         async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
@@ -480,27 +507,42 @@
             const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
             const obs = document.getElementById('observacao').value;
 
-            if (!resultado) return alert('Selecione o resultado!');
-            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) return alert('Informe o valor do cashout!');
-            if (!dataISO) return alert('Selecione a data!');
-            if (isNaN(odd) || odd < 1.01) return alert('Odd inválida!');
+            if (!resultado) {
+                alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
+                return;
+            }
+            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
+                alert('Informe um valor válido para o Cashout!');
+                return;
+            }
+            if (!dataISO) {
+                alert('Selecione a data da aposta!');
+                return;
+            }
+            if (isNaN(odd) || odd < 1.01) {
+                alert('Digite uma odd válida (ex: 1.50)!');
+                return;
+            }
 
-            let retorno, lucro;
-            if (resultado === 'green') { retorno = valor * odd; lucro = retorno - valor; }
-            else if (resultado === 'red') { retorno = 0; lucro = -valor; }
-            else { retorno = valorCashout; lucro = valorCashout - valor; }
+            const dataFormatada = formatarDataExibicao(dataISO);
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+
+            let lucro, retorno;
+            if (resultado === 'green') {
+                retorno = valor * odd;
+                lucro = retorno - valor;
+            } else if (resultado === 'red') {
+                retorno = 0;
+                lucro = -valor;
+            } else {
+                retorno = valorCashout;
+                lucro = valorCashout - valor;
+            }
 
             const dados = {
-                valor,
-                odd,
-                dataISO,
-                data: formatarDataExibicao(dataISO),
-                valorCashout,
-                retorno,
-                lucro,
-                resultado,
-                obs,
-                timestamp: new Date(dataISO)
+                valor, odd, dataISO, data: dataFormatada,
+                valorCashout: resultado === 'cashout' ? valorCashout : null,
+                retorno, lucro, resultado, obs, timestamp
             };
 
             if (id) {
@@ -513,54 +555,54 @@
             atualizarDados();
         }
 
-        // 🗑️ Excluir aposta
+        // 🗑️ Excluir aposta do Firebase
         async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
-            if (!id || !confirm('Deseja excluir esta aposta?')) return;
-            await deleteDoc(doc(db, 'apostas', id));
-            fecharModal();
-            atualizarDados();
+            if (!id) return;
+            if (confirm('Deseja excluir esta aposta?')) {
+                await deleteDoc(doc(db, 'apostas', id));
+                fecharModal();
+                atualizarDados();
+            }
         }
 
-        // 📊 Atualizar todos os dados
+        // ✅ CÁLCULO CORRIGIDO - Agora busca dados do Firebase
         async function atualizarDados() {
+            // Busca banca
             const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
             bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
+            // Busca todas as apostas ordenadas por data
             const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
             const snapshot = await getDocs(q);
             apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
             const hojeISO = dataHojeLocal();
-            let dataInicial = null;
+            const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
 
+            // Percorre todas as apostas e soma corretamente
             apostas.forEach(a => {
                 totalInvestido += a.valor || 0;
                 totalLucro += a.lucro || 0;
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
-                else if (a.resultado === 'cashout') qtdCashout++;
-                if (a.dataISO === hojeISO) balancoDia += a.lucro || 0;
-                const dataAtual = new Date(a.dataISO);
-                if (!dataInicial || dataAtual < dataInicial) dataInicial = dataAtual;
+                else qtdCashout++;
+                // ✅ Aqui soma o lucro/prejuízo COMPLETO do dia
+                if (a.dataISO === hojeISO) {
+                    balancoDia += a.lucro || 0;
+                }
             });
-
-            let diferencaDias = 0;
-            if (apostas.length > 0 && dataInicial) {
-                const hoje = new Date();
-                const diferencaMs = hoje - dataInicial;
-                diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
-            }
 
             const saldoAtual = bancaInicial + totalLucro;
             const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
-
-            let tempoTexto = diferencaDias === 1 ? '1 dia' : diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? '1 mês' : `${Math.floor(diferencaDias / 30)} meses`;
+            const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
+            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
             document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
             document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
 
+            // ✅ Exibe balanço do dia com valor e cor corretos
             const balancoDiaEl = document.getElementById('balancoDia');
             if (balancoDia !== 0) {
                 balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
