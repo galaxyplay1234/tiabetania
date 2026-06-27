@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tia Betânia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        green: '#34C759',
+                        red: '#FF3B30',
+                        blue: '#007AFF',
+                        grayText: '#86868B',
+                        lightBg: '#F2F2F7',
+                        menuBg: '#F8F8F8',
+                        menuActive: '#E5E5EA',
+                        greenLight: '#E8F5E9',
+                        redLight: '#FFEBEE',
+                    },
+                    fontFamily: {
+                        sf: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Helvetica Neue', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .no-select {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+            .btn-header {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.06);
+                display: grid;
+                place-items: center;
+                font-size: 22px;
+                font-weight: 500;
+                transition: background 0.2s ease;
+            }
+            .btn-header:hover {
+                background: rgba(0, 0, 0, 0.1);
+            }
+            .tab-menu {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                width: 100%;
+                height: 100%;
+                border-radius: 14px;
+                transition: background 0.2s ease;
+            }
+            .tab-active {
+                background-color: #E5E5EA;
+                color: #000000;
+            }
+            .tab-inactive {
+                color: #86868B;
+            }
+            .btn-resultado {
+                flex: 1;
+                padding: 12px;
+                border-radius: 12px;
+                border: 1px solid #E0E0E0;
+                text-align: center;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+            .btn-green.active {
+                background-color: #E8F5E9;
+                border-color: #A5D6A7;
+                color: #2E7D32;
+            }
+            .btn-red.active {
+                background-color: #FFEBEE;
+                border-color: #EF9A9A;
+                color: #C62828;
+            }
+            .scrollbar-hide::-webkit-scrollbar { display: none; }
+            .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+
+        html, body {
+            overscroll-behavior: none;
+            touch-action: pan-x pan-y;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #F2F2F7;
+        }
+    </style>
+</head>
+<body class="text-gray-900 no-select">
+    <div class="max-w-md mx-auto min-h-screen relative pb-28">
+
+        <!-- Cabeçalho mais compacto e centralizado -->
+        <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
+            <h1 class="text-xl font-semibold">Tia Betânia</h1>
+            <button onclick="abrirModal()" class="btn-header">+</button>
+        </header>
+
+        <!-- Página Home -->
+        <div id="paginaHome" class="px-6 py-6 space-y-6">
+
+            <!-- Card Saldo Total -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <p class="text-gray-500 text-base">Total</p>
+                <h2 class="text-3xl font-bold mt-1">R$ <span id="saldoTotal">0,00</span></h2>
+                <div class="grid grid-cols-2 gap-4 mt-5">
+                    <div>
+                        <p class="text-gray-500 text-sm">Balanço do dia</p>
+                        <p class="text-lg font-medium" id="balancoDia">--</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Rentabilidade</p>
+                        <p class="text-lg font-medium" id="rentabilidadeDia">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm">
+                <div class="h-72 flex flex-col items-center justify-center">
+                    <canvas id="graficoResultados" class="w-full h-full"></canvas>
+                    <p class="text-gray-500 text-sm mt-4">Gráfico com balanço de apostas</p>
+                </div>
+            </div>
+
+            <!-- Resumo Geral -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm space-y-4">
+                <div>
+                    <p class="text-gray-500 text-base">Valor total investido</p>
+                    <p class="text-xl font-semibold mt-1">R$ <span id="valorInvestido">0,00</span></p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-base">Balanço total</p>
+                    <p class="text-xl font-semibold" id="balancoTotal">R$ 0,00</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-base">Rentabilidade total</p>
+                    <p class="text-xl font-semibold" id="rentabilidadeTotal">0,00%</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-base">Tempo total</p>
+                    <p class="text-xl font-semibold" id="tempoTotal">0 dias</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-base">Total de apostas</p>
+                    <p class="text-xl font-semibold" id="totalApostas">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Página Histórico -->
+        <div id="paginaHistorico" class="hidden px-6 py-6">
+            <h2 class="text-xl font-semibold mb-4">Histórico de Apostas</h2>
+            <div id="listaHistorico" class="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
+                <div class="text-center text-gray-400 py-10">
+                    <i class="fa fa-history text-4xl mb-3"></i>
+                    <p>Nenhuma aposta registrada ainda</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Inferior igual ao modelo -->
+        <nav class="fixed bottom-4 left-4 right-4 z-40 bg-[#F8F8F8] rounded-[20px] shadow-md p-1.5">
+            <div class="flex justify-between items-center h-16">
+                <button onclick="mudarPagina('home')" id="tabHome" class="tab-menu tab-active">
+                    <i class="fa fa-home text-xl"></i>
+                    <span class="text-xs font-medium">Home</span>
+                </button>
+                <button onclick="mudarPagina('historico')" id="tabHistorico" class="tab-menu tab-inactive">
+                    <i class="fa fa-list-alt text-xl"></i>
+                    <span class="text-xs font-medium">Histórico</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Modal de Registro com alterações -->
+        <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-xl font-semibold">Nova Aposta</h3>
+                    <button onclick="fecharModal()" class="btn-header">×</button>
+                </div>
+                <form id="formAposta" onsubmit="salvarAposta(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
+                        <input type="number" step="0.01" min="0.10" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 100,00" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Odd</label>
+                        <input type="number" step="0.01" min="1.01" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.50" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-2">Resultado</label>
+                        <div class="flex gap-3">
+                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Green</div>
+                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Red</div>
+                        </div>
+                        <input type="hidden" id="resultado" value="">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
+                        <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
+                    </div>
+                    <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Aposta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
+        let grafico;
+
+        function iniciarGrafico() {
+            const ctx = document.getElementById('graficoResultados').getContext('2d');
+            grafico = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Green', 'Red'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#34C759', '#FF3B30'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 14 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function mudarPagina(pagina) {
+            document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
+            document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
+            
+            if (pagina === 'home') {
+                document.getElementById('tabHome').classList.add('tab-active');
+                document.getElementById('tabHome').classList.remove('tab-inactive');
+                document.getElementById('tabHistorico').classList.add('tab-inactive');
+                document.getElementById('tabHistorico').classList.remove('tab-active');
+            } else {
+                document.getElementById('tabHistorico').classList.add('tab-active');
+                document.getElementById('tabHistorico').classList.remove('tab-inactive');
+                document.getElementById('tabHome').classList.add('tab-inactive');
+                document.getElementById('tabHome').classList.remove('tab-active');
+            }
+        }
+
+        function selecionarResultado(tipo) {
+            document.getElementById('resultado').value = tipo;
+            document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
+            document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
+        }
+
+        function abrirModal() {
+            document.getElementById('modalAposta').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('formAposta').reset();
+            selecionarResultado('');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalAposta').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function salvarAposta(e) {
+            e.preventDefault();
+            const valor = parseFloat(document.getElementById('valorApostado').value);
+            const odd = parseFloat(document.getElementById('odd').value);
+            const resultado = document.getElementById('resultado').value;
+            const obs = document.getElementById('observacao').value;
+            const data = new Date();
+
+            if (!resultado) {
+                alert('Selecione o resultado: Green ou Red!');
+                return;
+            }
+
+            const retornoTotal = valor * odd;
+            const lucro = resultado === 'green' ? retornoTotal - valor : -valor;
+
+            const nova = {
+                id: Date.now(),
+                valor,
+                odd,
+                retorno: retornoTotal,
+                lucro,
+                resultado,
+                obs,
+                data: data.toLocaleDateString('pt-BR'),
+                timestamp: data.getTime()
+            };
+
+            apostas.unshift(nova);
+            localStorage.setItem('apostasBetania', JSON.stringify(apostas));
+            fecharModal();
+            atualizarDados();
+        }
+
+        function atualizarDados() {
+            let totalInvestido = 0;
+            let totalLucro = 0;
+            let qtdGreen = 0, qtdRed = 0;
+            let balancoDia = 0;
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            const dataInicial = apostas.length ? new Date(apostas[apostas.length - 1].timestamp) : new Date();
+
+            apostas.forEach(a => {
+                totalInvestido += a.valor;
+                totalLucro += a.lucro;
+                if (a.resultado === 'green') qtdGreen++;
+                else qtdRed++;
+                if (a.data === hoje) balancoDia += a.lucro;
+            });
+
+            const rentabilidadeTotal = totalInvestido > 0 ? ((totalLucro / totalInvestido) * 100).toFixed(2) : 0;
+            const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
+            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+
+            document.getElementById('saldoTotal').textContent = totalLucro.toFixed(2).replace('.', ',');
+            document.getElementById('balancoDia').textContent = balancoDia.toFixed(2).replace('.', ',');
+            document.getElementById('rentabilidadeDia').textContent = balancoDia !== 0 ? `${((balancoDia / (totalInvestido || 1)) * 100).toFixed(2)}%` : '--';
+            document.getElementById('valorInvestido').textContent = totalInvestido.toFixed(2).replace('.', ',');
+            document.getElementById('balancoTotal').textContent = `R$ ${totalLucro.toFixed(2).replace('.', ',')}`;
+            document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
+            document.getElementById('tempoTotal').textContent = tempoTexto;
+            document.getElementById('totalApostas').textContent = apostas.length;
+
+            grafico.data.datasets[0].data = [qtdGreen, qtdRed];
+            grafico.update();
+
+            atualizarHistorico();
+        }
+
+        function atualizarHistorico() {
+            const lista = document.getElementById('listaHistorico');
+            if (apostas.length === 0) {
+                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhuma aposta registrada ainda</p></div>`;
+                return;
+            }
+            lista.innerHTML = '';
+            apostas.forEach(a => {
+                const cor = a.resultado === 'green' ? 'text-green' : 'text-red';
+                const icone = a.resultado === 'green' ? 'fa-arrow-up' : 'fa-arrow-down';
+                lista.innerHTML += `
+                    <div class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} bg-opacity-10 bg-${cor.replace('text-', '')}/10">
+                                <i class="fa ${icone}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">${a.obs || 'Aposta'}</p>
+                                <p class="text-xs text-gray-500">${a.data} • Apostado: R$ ${a.valor.toFixed(2).replace('.', ',')} • Odd: ${a.odd.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-semibold ${cor}">R$ ${a.lucro.toFixed(2).replace('.', ',')}</p>
+                            <p class="text-xs text-gray-500">${a.resultado.toUpperCase()}</p>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        window.onload = () => {
+            iniciarGrafico();
+            atualizarDados();
+        };
+    </script>
+</body>
+</html>
