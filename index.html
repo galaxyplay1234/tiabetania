@@ -52,7 +52,7 @@
                 background: rgba(0, 0, 0, 0.06);
                 display: grid;
                 place-items: center;
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: 500;
                 transition: background 0.2s ease;
             }
@@ -138,9 +138,11 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
+        <!-- Cabeçalho com botão Atualizar adicionado -->
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
+                <button onclick="atualizarDados()" class="btn-header" title="Atualizar Balanço">🔄</button>
                 <button onclick="abrirModalBanca()" class="btn-header" title="Configurar Banca">⚙️</button>
                 <button onclick="abrirModal()" class="btn-header">+</button>
             </div>
@@ -290,7 +292,7 @@
         let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
         let grafico;
 
-        // ✅ Função para pegar data de hoje no formato local (sem erro de fuso)
+        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -299,7 +301,6 @@
             return `${ano}-${mes}-${dia}`;
         }
 
-        // ✅ Função para converter data para exibição no formato brasileiro
         function formatarDataExibicao(dataISO) {
             if (!dataISO) return '';
             const [ano, mes, dia] = dataISO.split('-');
@@ -533,7 +534,12 @@
             }
         }
 
+        // ✅ Função principal que recalcula tudo
         function atualizarDados() {
+            // Recarrega os dados mais recentes do armazenamento
+            apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
+            bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
+
             let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
             const hojeISO = dataHojeLocal();
             const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
