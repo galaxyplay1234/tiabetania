@@ -680,18 +680,9 @@
                 apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 // Busca movimentações (depósito/saque)
-                movimentacoes = [];
-
-try {
-    const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
-    const snapMov = await getDocs(qMov);
-    movimentacoes = snapMov.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
-} catch (e) {
-    console.log("Coleção movimentacoes ainda não existe.");
-}
+                const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
+                const snapMov = await getDocs(qMov);
+                movimentacoes = snapMov.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
                 const hojeISO = dataHojeLocal();
@@ -768,9 +759,9 @@ try {
                 atualizarHistorico();
 
             } catch (erro) {
-                console.error('Erro ao carregar dados:', erro);
-                alert('Erro ao carregar dados. Verifique sua conexão.');
-            }
+    console.error(erro);
+    alert(erro.message);
+}
         }
 
         // ✅ HISTÓRICO COM APOSTAS + DEPÓSITOS + SAQUES
