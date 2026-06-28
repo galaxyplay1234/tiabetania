@@ -145,7 +145,7 @@
             .aposta-item:hover {
                 background-color: #F9F9F9;
             }
-            /* Estilos novos para movimentações */
+            /* Estilos para movimentações */
             .mov-dep { border-left: 4px solid #10B981; background: #F0FDF4; }
             .mov-saq { border-left: 4px solid #EF4444; background: #FEF2F2; }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -179,7 +179,7 @@
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
-                <!-- NOVOS BOTÕES -->
+                <!-- Novos botões -->
                 <button onclick="abrirModalDeposito()" class="btn-header" title="Depósito">💲</button>
                 <button onclick="abrirModalSaque()" class="btn-header" title="Saque">💸</button>
                 <button onclick="atualizarDados()" class="btn-header" title="Atualizar Balanço">🔄</button>
@@ -371,7 +371,7 @@
 
     <script>
         let apostas = [];
-        let movimentacoes = []; // NOVO: armazena depósitos e saques
+        let movimentacoes = []; // Nova variável para depósitos e saques
         let bancaInicial = 0;
         let grafico;
 
@@ -498,7 +498,7 @@
             }
         }
 
-        // 🚀 FUNÇÕES NOVAS DE DEPÓSITO
+        // 🚀 FUNÇÕES DE DEPÓSITO
         function abrirModalDeposito() {
             document.getElementById('modalDeposito').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -524,7 +524,7 @@
             atualizarDados();
         }
 
-        // 🚀 FUNÇÕES NOVAS DE SAQUE
+        // 🚀 FUNÇÕES DE SAQUE
         function abrirModalSaque() {
             document.getElementById('modalSaque').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -596,7 +596,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        // 💾 Salvar/Editar aposta no Firebase — IGUAL AO ORIGINAL
+        // 💾 Salvar/Editar aposta no Firebase — mantido exatamente como estava
         async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
@@ -656,7 +656,7 @@
             atualizarDados();
         }
 
-        // 🗑️ Excluir aposta do Firebase — IGUAL AO ORIGINAL
+        // 🗑️ Excluir aposta do Firebase — mantido
         async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
             if (!id) return;
@@ -667,14 +667,14 @@
             }
         }
 
-        // ✅ FUNÇÃO PRINCIPAL — MANTÉM TUDO QUE FUNCIONAVA + ADICIONA DEPÓSITO/SAQUE
+        // ✅ FUNÇÃO ATUALIZADA: mantém todo o cálculo original + adiciona depósito/saque
         async function atualizarDados() {
             try {
                 // Busca banca
                 const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
                 bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-                // Busca apostas — MESMA FORMA DO CÓDIGO ORIGINAL
+                // Busca apostas — MESMA FORMA ORIGINAL
                 const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
                 const snapshot = await getDocs(q);
                 apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -724,7 +724,7 @@
                     }
                 });
 
-                // ✅ CÁLCULO DO SALDO FINAL
+                // ✅ CÁLCULO DO SALDO ATUALIZADO
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
                 const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
