@@ -145,6 +145,16 @@
             .aposta-item:hover {
                 background-color: #F9F9F9;
             }
+            .movimentacao-item {
+                background: #F8FAFC;
+                border-left: 4px solid;
+            }
+            .movimentacao-deposito {
+                border-color: #10B981;
+            }
+            .movimentacao-saque {
+                border-color: #EF4444;
+            }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -176,6 +186,8 @@
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
+                <button onclick="abrirModalDeposito()" class="btn-header" title="Depósito">💲</button>
+                <button onclick="abrirModalSaque()" class="btn-header" title="Saque">💸</button>
                 <button onclick="atualizarDados()" class="btn-header" title="Atualizar Balanço">🔄</button>
                 <button onclick="abrirModalBanca()" class="btn-header" title="Configurar Banca">⚙️</button>
                 <button onclick="abrirModal()" class="btn-header">+</button>
@@ -230,11 +242,11 @@
         </div>
 
         <div id="paginaHistorico" class="hidden px-6 py-6">
-            <h2 class="text-xl font-semibold mb-4">Histórico de Apostas</h2>
+            <h2 class="text-xl font-semibold mb-4">Histórico</h2>
             <div id="listaHistorico" class="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
                 <div class="text-center text-gray-400 py-10">
                     <i class="fa fa-history text-4xl mb-3"></i>
-                    <p>Nenhuma aposta registrada ainda</p>
+                    <p>Nenhuma movimentação registrada ainda</p>
                 </div>
             </div>
         </div>
@@ -251,6 +263,48 @@
                 </button>
             </div>
         </nav>
+
+        <!-- Modal Depósito -->
+        <div id="modalDeposito" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-xl font-semibold">Novo Depósito</h3>
+                    <button onclick="fecharModalDeposito()" class="btn-header">×</button>
+                </div>
+                <form onsubmit="salvarDeposito(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Valor (R$)</label>
+                        <input type="text" id="valorDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Ex: 30,00" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
+                        <input type="text" id="obsDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Ex: Pix, Transferência...">
+                    </div>
+                    <button type="submit" class="w-full bg-green hover:bg-green/90 text-white font-medium rounded-xl p-3.5 mt-3">Registrar Depósito</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Saque -->
+        <div id="modalSaque" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-xl font-semibold">Novo Saque</h3>
+                    <button onclick="fecharModalSaque()" class="btn-header">×</button>
+                </div>
+                <form onsubmit="salvarSaque(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Valor (R$)</label>
+                        <input type="text" id="valorSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Ex: 20,00" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
+                        <input type="text" id="obsSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Ex: Retirada, Lucro...">
+                    </div>
+                    <button type="submit" class="w-full bg-red hover:bg-red/90 text-white font-medium rounded-xl p-3.5 mt-3">Registrar Saque</button>
+                </form>
+            </div>
+        </div>
 
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
             <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
@@ -323,6 +377,7 @@
 
     <script>
         let apostas = [];
+        let movimentacoes = [];
         let bancaInicial = 0;
         let grafico;
 
@@ -395,8 +450,7 @@
                         ctx.textBaseline = 'middle';
                         const meta = chart.getDatasetMeta(0);
                         meta.data.forEach((fatia, i) => {
-                            const pos = fatia.tooltipPosition();
-                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], fatia.tooltipPosition().x, fatia.tooltipPosition().y);
                         });
                     }
                 }]
@@ -447,6 +501,87 @@
             } else {
                 alert('Digite um valor válido!');
             }
+        }
+
+        // 📥 Modais Depósito e Saque
+        function abrirModalDeposito() {
+            document.getElementById('modalDeposito').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const input = document.getElementById('valorDeposito');
+            input.oninput = () => formatarMoeda(input);
+            input.value = '';
+            document.getElementById('obsDeposito').value = '';
+        }
+
+        function fecharModalDeposito() {
+            document.getElementById('modalDeposito').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function abrirModalSaque() {
+            document.getElementById('modalSaque').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const input = document.getElementById('valorSaque');
+            input.oninput = () => formatarMoeda(input);
+            input.value = '';
+            document.getElementById('obsSaque').value = '';
+        }
+
+        function fecharModalSaque() {
+            document.getElementById('modalSaque').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 💾 Salvar Depósito
+        async function salvarDeposito(e) {
+            e.preventDefault();
+            const valor = converterParaNumero(document.getElementById('valorDeposito').value);
+            const obs = document.getElementById('obsDeposito').value || 'Depósito';
+            const dataISO = dataHojeLocal();
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+
+            if (valor <= 0) {
+                alert('Digite um valor maior que zero!');
+                return;
+            }
+
+            await addDoc(collection(db, 'movimentacoes'), {
+                tipo: 'deposito',
+                valor,
+                obs,
+                dataISO,
+                data: formatarDataExibicao(dataISO),
+                timestamp
+            });
+
+            fecharModalDeposito();
+            atualizarDados();
+        }
+
+        // 💾 Salvar Saque
+        async function salvarSaque(e) {
+            e.preventDefault();
+            const valor = converterParaNumero(document.getElementById('valorSaque').value);
+            const obs = document.getElementById('obsSaque').value || 'Saque';
+            const dataISO = dataHojeLocal();
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+
+            if (valor <= 0) {
+                alert('Digite um valor maior que zero!');
+                return;
+            }
+
+            await addDoc(collection(db, 'movimentacoes'), {
+                tipo: 'saque',
+                valor,
+                obs,
+                dataISO,
+                data: formatarDataExibicao(dataISO),
+                timestamp
+            });
+
+            fecharModalSaque();
+            atualizarDados();
         }
 
         function selecionarResultado(tipo) {
@@ -566,114 +701,154 @@
             }
         }
 
-        // ✅ CÁLCULO CORRIGIDO DEFINITIVO - Balanço do dia funcionando
-async function atualizarDados() {
-    // Busca banca
-    const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
-    bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+        // ✅ Atualizar todos os dados
+        async function atualizarDados() {
+            // Busca banca
+            const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
+            bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-    // Busca todas as apostas ordenadas por data
-    const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
-    const snapshot = await getDocs(q);
-    apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Busca apostas
+            const qApostas = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+            const snapApostas = await getDocs(qApostas);
+            apostas = snapApostas.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
-    const hojeISO = dataHojeLocal(); // formato: YYYY-MM-DD
-    let dataInicial = null;
+            // Busca movimentações
+            const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
+            const snapMov = await getDocs(qMov);
+            movimentacoes = snapMov.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Percorre todas as apostas e soma corretamente
-    apostas.forEach(a => {
-        const valor = a.valor || 0;
-        const lucro = a.lucro || 0;
+            let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
+            let totalDepositos = 0, totalSaques = 0;
+            const hojeISO = dataHojeLocal();
+            let dataInicial = null;
 
-        totalInvestido += valor;
-        totalLucro += lucro;
+            // Processa apostas
+            apostas.forEach(a => {
+                const valor = a.valor || 0;
+                const lucro = a.lucro || 0;
 
-        if (a.resultado === 'green') qtdGreen++;
-        else if (a.resultado === 'red') qtdRed++;
-        else if (a.resultado === 'cashout') qtdCashout++;
+                totalInvestido += valor;
+                totalLucro += lucro;
 
-        // ✅ CORREÇÃO: Compara diretamente a data no formato ISO
-        if (a.dataISO === hojeISO) {
-            balancoDia += lucro;
+                if (a.resultado === 'green') qtdGreen++;
+                else if (a.resultado === 'red') qtdRed++;
+                else if (a.resultado === 'cashout') qtdCashout++;
+
+                if (a.dataISO === hojeISO) balancoDia += lucro;
+
+                const dataAtual = new Date(a.dataISO);
+                if (!dataInicial || dataAtual < dataInicial) dataInicial = dataAtual;
+            });
+
+            // Processa depósitos e saques
+            movimentacoes.forEach(m => {
+                if (m.tipo === 'deposito') {
+                    totalDepositos += m.valor;
+                    if (m.dataISO === hojeISO) balancoDia += m.valor;
+                } else if (m.tipo === 'saque') {
+                    totalSaques += m.valor;
+                    if (m.dataISO === hojeISO) balancoDia -= m.valor;
+                }
+            });
+
+            // Cálculo final do saldo
+            const saldoAtual = bancaInicial + totalLucro + totalDepositos - totalSaques;
+            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
+
+            let diferencaDias = 0;
+            if (apostas.length > 0 && dataInicial) {
+                const hoje = new Date();
+                const diferencaMs = hoje - dataInicial;
+                diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+            }
+
+            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+
+            document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
+            document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+
+            const balancoDiaEl = document.getElementById('balancoDia');
+            if (balancoDia !== 0) {
+                balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
+                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+            } else {
+                balancoDiaEl.textContent = 'R$ 0,00';
+                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
+            }
+
+            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
+            document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
+
+            const balancoTotalEl = document.getElementById('balancoTotal');
+            balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+            balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
+            document.getElementById('tempoTotal').textContent = tempoTexto;
+            document.getElementById('totalApostas').textContent = apostas.length;
+
+            grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
+            grafico.update();
+            atualizarHistorico();
         }
-
-        // Define a data mais antiga para calcular o tempo total
-        const dataAtual = new Date(a.dataISO);
-        if (!dataInicial || dataAtual < dataInicial) {
-            dataInicial = dataAtual;
-        }
-    });
-
-    const saldoAtual = bancaInicial + totalLucro;
-    const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
-
-    let diferencaDias = 0;
-    if (apostas.length > 0 && dataInicial) {
-        const hoje = new Date();
-        const diferencaMs = hoje - dataInicial;
-        diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
-    }
-
-    const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
-
-    document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
-    document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
-
-    // ✅ Exibe balanço do dia com valor e cor corretos
-    const balancoDiaEl = document.getElementById('balancoDia');
-    if (balancoDia !== 0) {
-        balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
-        balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
-    } else {
-        balancoDiaEl.textContent = 'R$ 0,00';
-        balancoDiaEl.className = 'text-lg font-medium text-gray-500';
-    }
-
-    document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
-    document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
-
-    const balancoTotalEl = document.getElementById('balancoTotal');
-    balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
-    balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
-
-    document.getElementById('tempoTotal').textContent = tempoTexto;
-    document.getElementById('totalApostas').textContent = apostas.length;
-
-    grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
-    grafico.update();
-    atualizarHistorico();
-}
 
         function atualizarHistorico() {
             const lista = document.getElementById('listaHistorico');
-            if (apostas.length === 0) {
-                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhuma aposta registrada ainda</p></div>`;
+            const todosItens = [...movimentacoes, ...apostas].sort((a, b) => b.timestamp - a.timestamp);
+
+            if (todosItens.length === 0) {
+                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhuma movimentação registrada ainda</p></div>`;
                 return;
             }
+
             lista.innerHTML = '';
-            apostas.forEach(a => {
-                const cor = a.resultado === 'green' ? 'text-green' : a.resultado === 'red' ? 'text-red' : 'text-yellow-600';
-                const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
-                const status = a.resultado === 'green' ? '🟢 Green' : a.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
-                lista.innerHTML += `
-                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})'>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
-                            <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
+            todosItens.forEach(item => {
+                if (item.tipo === 'deposito' || item.tipo === 'saque') {
+                    // Linha de depósito/saque
+                    const cor = item.tipo === 'deposito' ? 'text-green-600' : 'text-red-600';
+                    const classe = item.tipo === 'deposito' ? 'movimentacao-deposito' : 'movimentacao-saque';
+                    const icone = item.tipo === 'deposito' ? 'fa-plus-circle' : 'fa-minus-circle';
+                    const valorSinal = item.tipo === 'deposito' ? `+ R$ ${formatarParaExibicao(item.valor)}` : `- R$ ${formatarParaExibicao(item.valor)}`;
+
+                    lista.innerHTML += `
+                    <div class="aposta-item movimentacao-item ${classe} bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 ${cor}">
+                                <i class="fa ${icone}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">${item.obs}</p>
+                                <p class="text-xs text-gray-400">${item.data}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="font-medium">${a.obs || 'Aposta'}</p>
-                            <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(a.valor)}</p>
-                            <p class="text-xs text-gray-500">Odd: ${a.odd.toFixed(2)} ${a.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(a.valorCashout)}` : ''}</p>
-                            <p class="text-xs text-gray-400">${a.data}</p>
+                        <div class="text-right">
+                            <p class="font-semibold ${cor}">${valorSinal}</p>
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                        <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(a.lucro)}</p>
-                    </div>
-                </div>`;
+                    </div>`;
+                } else {
+                    // Linha de aposta
+                    const cor = item.resultado === 'green' ? 'text-green' : item.resultado === 'red' ? 'text-red' : 'text-yellow-600';
+                    const corClara = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
+                    const status = item.resultado === 'green' ? '🟢 Green' : item.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
+
+                    lista.innerHTML += `
+                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
+                                <i class="fa ${item.resultado === 'green' ? 'fa-arrow-up' : item.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">${item.obs || 'Aposta'}</p>
+                                <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(item.valor)}</p>
+                                <p class="text-xs text-gray-500">Odd: ${item.odd.toFixed(2)} ${item.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(item.valorCashout)}` : ''}</p>
+                                <p class="text-xs text-gray-400">${item.data}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
+                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p>
+                        </div>
+                    </div>`;
+                }
             });
         }
 
