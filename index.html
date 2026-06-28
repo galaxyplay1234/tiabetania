@@ -13,6 +13,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
+        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
             authDomain: "tiabetania.firebaseapp.com",
@@ -23,9 +24,11 @@
             measurementId: "G-M01M8ZYK9D"
         };
 
+        // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Disponibiliza para o resto do código
         window.db = db;
         window.doc = doc;
         window.setDoc = setDoc;
@@ -65,26 +68,108 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-            .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(0,0,0,0.06); }
-            .btn-header { width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.06); display: grid; place-items: center; font-size: 20px; font-weight: 500; transition: background 0.2s; }
-            .btn-header:hover { background: rgba(0,0,0,0.1); }
-            .tab-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 100%; border-radius: 14px; transition: background 0.2s; }
-            .tab-active { background-color: #E5E5EA; color: #000; }
-            .tab-inactive { color: #86868B; }
-            .btn-resultado { flex: 1; padding: 12px 6px; border-radius: 12px; border: 1px solid #E0E0E0; text-align: center; font-weight: 500; font-size: 13px; transition: all 0.2s; cursor: pointer; }
-            .btn-green.active { background: #E8F5E9; border-color: #A5D6A7; color: #2E7D32; }
-            .btn-red.active { background: #FFEBEE; border-color: #EF9A9A; color: #C62828; }
-            .btn-cashout.active { background: #FFFBEB; border-color: #FDE68A; color: #92720E; }
-            .aposta-item { cursor: pointer; transition: background 0.2s; }
-            .aposta-item:hover { background: #F9F9F9; }
+            .no-select {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+            .btn-header {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.06);
+                display: grid;
+                place-items: center;
+                font-size: 20px;
+                font-weight: 500;
+                transition: background 0.2s ease;
+            }
+            .btn-header:hover {
+                background: rgba(0, 0, 0, 0.1);
+            }
+            .tab-menu {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                width: 100%;
+                height: 100%;
+                border-radius: 14px;
+                transition: background 0.2s ease;
+            }
+            .tab-active {
+                background-color: #E5E5EA;
+                color: #000000;
+            }
+            .tab-inactive {
+                color: #86868B;
+            }
+            .btn-resultado {
+                flex: 1;
+                padding: 12px 6px;
+                border-radius: 12px;
+                border: 1px solid #E0E0E0;
+                text-align: center;
+                font-weight: 500;
+                font-size: 13px;
+                transition: all 0.2s ease;
+                cursor: pointer;
+            }
+            .btn-green.active {
+                background-color: #E8F5E9;
+                border-color: #A5D6A7;
+                color: #2E7D32;
+            }
+            .btn-red.active {
+                background-color: #FFEBEE;
+                border-color: #EF9A9A;
+                color: #C62828;
+            }
+            .btn-cashout.active {
+                background-color: #FFFBEB;
+                border-color: #FDE68A;
+                color: #92720E;
+            }
+            .aposta-item {
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .aposta-item:hover {
+                background-color: #F9F9F9;
+            }
             .mov-dep { border-left: 4px solid #10B981; background: #F0FDF4; }
             .mov-saq { border-left: 4px solid #EF4444; background: #FEF2F2; }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-            input[type="date"] { -webkit-appearance: none; appearance: none; background: #fff; color: #111; text-align: left; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; padding-right: 40px; }
+
+            input[type="date"] {
+                -webkit-appearance: none;
+                appearance: none;
+                background-color: #ffffff;
+                color: #111827;
+                text-align: left;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 12px center;
+                background-size: 20px;
+                padding-right: 40px;
+            }
         }
-        html, body { overscroll-behavior: none; touch-action: pan-x pan-y; font-family: 'SF Pro Display', -apple-system, sans-serif; background: #F2F2F7; }
+
+        html, body {
+            overscroll-behavior: none;
+            touch-action: pan-x pan-y;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #F2F2F7;
+        }
     </style>
 </head>
 <body class="text-gray-900 no-select">
@@ -93,9 +178,10 @@
         <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
+                <!-- NOVOS BOTÕES DE DEPÓSITO E SAQUE -->
                 <button onclick="abrirModalDeposito()" class="btn-header" title="Depósito">💲</button>
                 <button onclick="abrirModalSaque()" class="btn-header" title="Saque">💸</button>
-                <button onclick="atualizarDados()" class="btn-header" title="Atualizar Dados">🔄</button>
+                <button onclick="atualizarDados()" class="btn-header" title="Atualizar Balanço">🔄</button>
                 <button onclick="abrirModalBanca()" class="btn-header" title="Configurar Banca">⚙️</button>
                 <button onclick="abrirModal()" class="btn-header">+</button>
             </div>
@@ -153,7 +239,7 @@
             <div id="listaHistorico" class="space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-hide">
                 <div class="text-center text-gray-400 py-10">
                     <i class="fa fa-history text-4xl mb-3"></i>
-                    <p>Carregando dados...</p>
+                    <p>Nenhum registro ainda</p>
                 </div>
             </div>
         </div>
@@ -171,50 +257,54 @@
             </div>
         </nav>
 
-        <!-- Modais -->
+        <!-- MODAL DE DEPÓSITO NOVO -->
         <div id="modalDeposito" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Novo Depósito</h3>
                     <button onclick="fecharModalDeposito()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarDeposito(event)" class="space-y-4">
-                    <input type="text" id="valorDeposito" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 100,00" required>
-                    <input type="text" id="obsDeposito" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Observação (opcional)">
-                    <button type="submit" class="w-full bg-green text-white rounded-xl p-3.5">Salvar</button>
+                    <input type="text" id="valorDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Ex: 100,00" required>
+                    <input type="text" id="obsDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Observação (opcional)">
+                    <button type="submit" class="w-full bg-green text-white font-medium rounded-xl p-3.5 mt-3">Salvar Depósito</button>
                 </form>
             </div>
         </div>
 
+        <!-- MODAL DE SAQUE NOVO -->
         <div id="modalSaque" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Novo Saque</h3>
                     <button onclick="fecharModalSaque()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarSaque(event)" class="space-y-4">
-                    <input type="text" id="valorSaque" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 50,00" required>
-                    <input type="text" id="obsSaque" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Observação (opcional)">
-                    <button type="submit" class="w-full bg-red text-white rounded-xl p-3.5">Salvar</button>
+                    <input type="text" id="valorSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Ex: 50,00" required>
+                    <input type="text" id="obsSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Observação (opcional)">
+                    <button type="submit" class="w-full bg-red text-white font-medium rounded-xl p-3.5 mt-3">Salvar Saque</button>
                 </form>
             </div>
         </div>
 
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Definir Banca Inicial</h3>
                     <button onclick="fecharModalBanca()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarBanca(event)" class="space-y-4">
-                    <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 1000,00" required>
-                    <button type="submit" class="w-full bg-blue text-white rounded-xl p-3.5">Salvar</button>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Valor da Banca (R$)</label>
+                        <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Banca</button>
                 </form>
             </div>
         </div>
 
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
                 <div class="flex justify-between items-center mb-5">
                     <h3 id="tituloModal" class="text-xl font-semibold">Nova Aposta</h3>
                     <button onclick="fecharModal()" class="btn-header">×</button>
@@ -225,12 +315,14 @@
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
-                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 10,00" required>
+                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,00" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
-                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 1.75" required>
+                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.75" required>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
                         <div class="flex gap-2">
@@ -239,21 +331,25 @@
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
-                        <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5">
+                        <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
                     </div>
+
                     <div id="campoValorCashout" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
-                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5" placeholder="Ex: 25,30">
+                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 25,30">
                     </div>
+
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
-                        <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: Futebol, Basquete...">
+                        <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
                     </div>
+
                     <div class="flex gap-3 mt-3">
-                        <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red rounded-xl p-3.5">Excluir</button>
-                        <button type="submit" class="flex-1 bg-blue text-white rounded-xl p-3.5">Salvar</button>
+                        <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
+                        <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -262,10 +358,11 @@
 
     <script>
         let apostas = [];
-        let movimentacoes = [];
+        let movimentacoes = []; // NOVO: armazena depósitos e saques
         let bancaInicial = 0;
         let grafico;
 
+        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -281,111 +378,212 @@
         }
 
         function formatarParaExibicao(valor) {
-            return (Number(valor) || 0).toFixed(2).replace('.', ',');
+            return (valor || 0).toFixed(2).replace('.', ',');
         }
 
         function converterParaNumero(valorTexto) {
-            return parseFloat(String(valorTexto).replace(',', '.')) || 0;
+            return parseFloat(valorTexto.replace(',', '.')) || 0;
         }
 
         function formatarMoeda(input) {
             let valor = input.value.replace(/\D/g, '');
-            if (!valor) { input.value = ''; return; }
-            input.value = (valor / 100).toFixed(2).replace('.', ',');
+            if (valor === '') { input.value = ''; return; }
+            valor = (valor / 100).toFixed(2);
+            valor = valor.replace('.', ',');
+            input.value = valor;
         }
 
         function formatarOdd(input) {
-            input.value = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+            let valor = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+            const partes = valor.split('.');
+            if (partes.length > 2) valor = partes[0] + '.' + partes[1];
+            input.value = valor;
         }
 
         function iniciarGrafico() {
             const ctx = document.getElementById('graficoResultados').getContext('2d');
             grafico = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: ['Green', 'Red', 'Cashout'], datasets: [{ data: [0,0,0], backgroundColor: ['#34C759','#FF3B30','#FFCC00'], borderWidth:0 }] },
-                options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{position:'bottom'}, tooltip:{enabled:false} } }
+                data: {
+                    labels: ['Green', 'Red', 'Cashout'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
+                        tooltip: { enabled: false }
+                    }
+                },
+                plugins: [{
+                    id: 'textoQuantidade',
+                    afterDatasetsDraw: function(chart) {
+                        const { ctx, data } = chart;
+                        ctx.font = 'bold 16px SF Pro Display';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((fatia, i) => {
+                            const pos = fatia.tooltipPosition();
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
+                        });
+                    }
+                }]
             });
         }
 
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
-            document.getElementById('tabHome').classList.toggle('tab-inactive', pagina !== 'home');
-            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
-            document.getElementById('tabHistorico').classList.toggle('tab-inactive', pagina !== 'historico');
+            if (pagina === 'home') {
+                document.getElementById('tabHome').classList.add('tab-active');
+                document.getElementById('tabHome').classList.remove('tab-inactive');
+                document.getElementById('tabHistorico').classList.add('tab-inactive');
+                document.getElementById('tabHistorico').classList.remove('tab-active');
+            } else {
+                document.getElementById('tabHistorico').classList.add('tab-active');
+                document.getElementById('tabHistorico').classList.remove('tab-inactive');
+                document.getElementById('tabHome').classList.add('tab-inactive');
+                document.getElementById('tabHome').classList.remove('tab-active');
+            }
         }
 
+        // 📥 Buscar banca do Firebase
         async function abrirModalBanca() {
-            const docSnap = await getDoc(doc(db, 'configuracoes', 'banca'));
+            const docRef = doc(db, 'configuracoes', 'banca');
+            const docSnap = await getDoc(docRef);
             bancaInicial = docSnap.exists() ? docSnap.data().valor : 0;
             document.getElementById('modalBanca').classList.remove('hidden');
-            const inp = document.getElementById('inputBanca');
-            inp.value = bancaInicial > 0 ? formatarParaExibicao(bancaInicial) : '';
-            inp.oninput = () => formatarMoeda(inp);
+            document.body.style.overflow = 'hidden';
+            const input = document.getElementById('inputBanca');
+            input.value = bancaInicial > 0 ? formatarParaExibicao(bancaInicial) : '';
+            input.oninput = () => formatarMoeda(input);
         }
-        function fecharModalBanca() { document.getElementById('modalBanca').classList.add('hidden'); }
+
+        function fecharModalBanca() {
+            document.getElementById('modalBanca').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 💾 Salvar banca no Firebase
         async function salvarBanca(e) {
             e.preventDefault();
-            const val = converterParaNumero(document.getElementById('inputBanca').value);
-            if (val >= 0) { await setDoc(doc(db, 'configuracoes', 'banca'), { valor: val }); fecharModalBanca(); atualizarDados(); }
+            const valor = converterParaNumero(document.getElementById('inputBanca').value);
+            if (!isNaN(valor) && valor >= 0) {
+                await setDoc(doc(db, 'configuracoes', 'banca'), { valor });
+                fecharModalBanca();
+                atualizarDados();
+            } else {
+                alert('Digite um valor válido!');
+            }
         }
 
-        function abrirModalDeposito() { document.getElementById('modalDeposito').classList.remove('hidden'); document.getElementById('valorDeposito').oninput = e => formatarMoeda(e.target); }
-        function fecharModalDeposito() { document.getElementById('modalDeposito').classList.add('hidden'); }
+        // 🚀 NOVAS FUNÇÕES DE DEPÓSITO
+        function abrirModalDeposito() {
+            document.getElementById('modalDeposito').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const inp = document.getElementById('valorDeposito');
+            inp.value = '';
+            inp.oninput = () => formatarMoeda(inp);
+        }
+        function fecharModalDeposito() {
+            document.getElementById('modalDeposito').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
         async function salvarDeposito(e) {
             e.preventDefault();
-            const val = converterParaNumero(document.getElementById('valorDeposito').value);
+            const valor = converterParaNumero(document.getElementById('valorDeposito').value);
             const obs = document.getElementById('obsDeposito').value || 'Depósito';
-            if (val <= 0) return alert('Valor inválido!');
-            await addDoc(collection(db, 'movimentacoes'), { tipo:'deposito', valor:val, obs, dataISO:dataHojeLocal(), timestamp:Date.now() });
-            fecharModalDeposito(); atualizarDados();
+            const dataISO = dataHojeLocal();
+            if (valor <= 0) return alert('Valor inválido!');
+            await addDoc(collection(db, 'movimentacoes'), {
+                tipo: 'deposito', valor, obs, dataISO,
+                timestamp: new Date(dataISO + 'T12:00:00').getTime()
+            });
+            fecharModalDeposito();
+            atualizarDados();
         }
 
-        function abrirModalSaque() { document.getElementById('modalSaque').classList.remove('hidden'); document.getElementById('valorSaque').oninput = e => formatarMoeda(e.target); }
-        function fecharModalSaque() { document.getElementById('modalSaque').classList.add('hidden'); }
+        // 🚀 NOVAS FUNÇÕES DE SAQUE
+        function abrirModalSaque() {
+            document.getElementById('modalSaque').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const inp = document.getElementById('valorSaque');
+            inp.value = '';
+            inp.oninput = () => formatarMoeda(inp);
+        }
+        function fecharModalSaque() {
+            document.getElementById('modalSaque').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
         async function salvarSaque(e) {
             e.preventDefault();
-            const val = converterParaNumero(document.getElementById('valorSaque').value);
+            const valor = converterParaNumero(document.getElementById('valorSaque').value);
             const obs = document.getElementById('obsSaque').value || 'Saque';
-            if (val <= 0) return alert('Valor inválido!');
-            await addDoc(collection(db, 'movimentacoes'), { tipo:'saque', valor:val, obs, dataISO:dataHojeLocal(), timestamp:Date.now() });
-            fecharModalSaque(); atualizarDados();
+            const dataISO = dataHojeLocal();
+            if (valor <= 0) return alert('Valor inválido!');
+            await addDoc(collection(db, 'movimentacoes'), {
+                tipo: 'saque', valor, obs, dataISO,
+                timestamp: new Date(dataISO + 'T12:00:00').getTime()
+            });
+            fecharModalSaque();
+            atualizarDados();
         }
 
         function selecionarResultado(tipo) {
             document.getElementById('resultado').value = tipo;
-            ['Green','Red','Cashout'].forEach(n => document.getElementById(`btn${n}`).classList.toggle('active', `'${tipo}' === '${n.toLowerCase()}'`));
+            document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
+            document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
+            document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
             document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
         }
 
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            const valorApostaInput = document.getElementById('valorApostado');
+            const valorCashoutInput = document.getElementById('valorCashout');
+            const oddInput = document.getElementById('odd');
+            const dataInput = document.getElementById('dataAposta');
+
+            valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
+            valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
+            oddInput.oninput = () => formatarOdd(oddInput);
+
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
-                document.getElementById('valorApostado').value = formatarParaExibicao(aposta.valor);
-                document.getElementById('odd').value = aposta.odd.toFixed(2);
-                document.getElementById('dataAposta').value = aposta.dataISO || dataHojeLocal();
+                valorApostaInput.value = formatarParaExibicao(aposta.valor);
+                oddInput.value = aposta.odd.toFixed(2);
+                dataInput.value = aposta.dataISO || dataHojeLocal();
                 document.getElementById('observacao').value = aposta.obs || '';
-                document.getElementById('valorCashout').value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
+                valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
                 document.getElementById('tituloModal').textContent = 'Nova Aposta';
                 document.getElementById('formAposta').reset();
                 document.getElementById('idAposta').value = '';
-                document.getElementById('dataAposta').value = dataHojeLocal();
+                dataInput.value = dataHojeLocal();
                 selecionarResultado('');
                 document.getElementById('btnExcluir').classList.add('hidden');
             }
-            document.getElementById('valorApostado').oninput = e => formatarMoeda(e.target);
-            document.getElementById('valorCashout').oninput = e => formatarMoeda(e.target);
-            document.getElementById('odd').oninput = e => formatarOdd(e.target);
         }
 
-        function fecharModal() { document.getElementById('modalAposta').classList.add('hidden'); }
+        function fecharModal() {
+            document.getElementById('modalAposta').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
 
+        // 💾 Salvar/Editar aposta no Firebase
         async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
@@ -393,77 +591,154 @@
             const odd = parseFloat(document.getElementById('odd').value);
             const dataISO = document.getElementById('dataAposta').value;
             const resultado = document.getElementById('resultado').value;
-            const valorCashout = resultado === 'cashout' ? converterParaNumero(document.getElementById('valorCashout').value) : null;
+            const valorCashoutTexto = document.getElementById('valorCashout').value.trim();
+            const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
             const obs = document.getElementById('observacao').value;
 
-            if (!resultado || !dataISO || isNaN(odd) || odd < 1.01) return alert('Preencha todos os campos corretamente!');
-            if (resultado === 'cashout' && !valorCashout) return alert('Informe o valor do Cashout!');
+            if (!resultado) {
+                alert('Selecione o resultado: Green, Red ou Cashout!');
+                return;
+            }
+            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
+                alert('Informe um valor válido para o Cashout!');
+                return;
+            }
+            if (!dataISO) {
+                alert('Selecione a data da aposta!');
+                return;
+            }
+            if (isNaN(odd) || odd < 1.01) {
+                alert('Digite uma odd válida (ex: 1.50)!');
+                return;
+            }
+
+            const dataFormatada = formatarDataExibicao(dataISO);
+            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
 
             let lucro, retorno;
-            if (resultado === 'green') { retorno = valor * odd; lucro = retorno - valor; }
-            else if (resultado === 'red') { retorno = 0; lucro = -valor; }
-            else { retorno = valorCashout; lucro = valorCashout - valor; }
+            if (resultado === 'green') {
+                retorno = valor * odd;
+                lucro = retorno - valor;
+            } else if (resultado === 'red') {
+                retorno = 0;
+                lucro = -valor;
+            } else {
+                retorno = valorCashout;
+                lucro = valorCashout - valor;
+            }
 
-            const dados = { valor, odd, dataISO, data: formatarDataExibicao(dataISO), valorCashout, retorno, lucro, resultado, obs, timestamp: new Date(dataISO).getTime() };
-            id ? await updateDoc(doc(db, 'apostas', id), dados) : await addDoc(collection(db, 'apostas'), dados);
-            fecharModal(); atualizarDados();
+            const dados = {
+                valor, odd, dataISO, data: dataFormatada,
+                valorCashout: resultado === 'cashout' ? valorCashout : null,
+                retorno, lucro, resultado, obs, timestamp
+            };
+
+            if (id) {
+                await updateDoc(doc(db, 'apostas', id), dados);
+            } else {
+                await addDoc(collection(db, 'apostas'), dados);
+            }
+
+            fecharModal();
+            atualizarDados();
         }
 
+        // 🗑️ Excluir aposta do Firebase
         async function excluirAposta() {
-            if (!confirm('Excluir esta aposta?')) return;
-            await deleteDoc(doc(db, 'apostas', document.getElementById('idAposta').value));
-            fecharModal(); atualizarDados();
+            const id = document.getElementById('idAposta').value;
+            if (!id) return;
+            if (confirm('Deseja excluir esta aposta?')) {
+                await deleteDoc(doc(db, 'apostas', id));
+                fecharModal();
+                atualizarDados();
+            }
         }
 
-        // ✅ FUNÇÃO PRINCIPAL CORRIGIDA — BUSCA TODOS OS DADOS SALVOS
+        // ✅ FUNÇÃO PRINCIPAL — MANTÉM TODA A LÓGICA ORIGINAL + ADICIONA DEPÓSITO/SAQUE
         async function atualizarDados() {
             try {
-                // Carrega banca
-                const bancaSnap = await getDoc(doc(db, 'configuracoes', 'banca'));
-                bancaInicial = bancaSnap.exists() ? bancaSnap.data().valor : 0;
+                // Busca banca
+                const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
+                bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-                // Carrega TODAS as apostas
-                const apostasSnap = await getDocs(collection(db, 'apostas'));
-                apostas = apostasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Busca todas as apostas — MESMA FORMA QUE FUNCIONAVA ANTES
+                const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                // Carrega TODAS as movimentações
-                const movSnap = await getDocs(collection(db, 'movimentacoes'));
-                movimentacoes = movSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                // Busca depósitos e saques
+                const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
+                const snapMov = await getDocs(qMov);
+                movimentacoes = snapMov.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                // Cálculos
-                let totalInvestido = 0, totalLucro = 0, balancoDia = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0;
-                const hoje = dataHojeLocal();
+                let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
+                const hojeISO = dataHojeLocal();
+                let dataInicial = null;
 
+                // ✅ CÁLCULO DAS APOSTAS EXATAMENTE COMO ERA ANTES
                 apostas.forEach(a => {
-                    const v = Number(a.valor) || 0;
-                    const l = Number(a.lucro) || 0;
-                    totalInvestido += v;
-                    totalLucro += l;
+                    const valor = a.valor || 0;
+                    const lucro = a.lucro || 0;
+
+                    totalInvestido += valor;
+                    totalLucro += lucro;
+
                     if (a.resultado === 'green') qtdGreen++;
-                    if (a.resultado === 'red') qtdRed++;
-                    if (a.resultado === 'cashout') qtdCashout++;
-                    if (a.dataISO === hoje) balancoDia += l;
+                    else if (a.resultado === 'red') qtdRed++;
+                    else if (a.resultado === 'cashout') qtdCashout++;
+
+                    if (a.dataISO === hojeISO) {
+                        balancoDia += lucro;
+                    }
+
+                    const dataAtual = new Date(a.dataISO);
+                    if (!dataInicial || dataAtual < dataInicial) {
+                        dataInicial = dataAtual;
+                    }
                 });
 
+                // ✅ SOMA DEPÓSITOS E SAQUES SEM ALTERAR A LÓGICA DAS APOSTAS
                 let totalDep = 0, totalSaq = 0;
                 movimentacoes.forEach(m => {
-                    const v = Number(m.valor) || 0;
-                    if (m.tipo === 'deposito') { totalDep += v; if (m.dataISO === hoje) balancoDia += v; }
-                    if (m.tipo === 'saque') { totalSaq += v; if (m.dataISO === hoje) balancoDia -= v; }
+                    const v = m.valor || 0;
+                    if (m.tipo === 'deposito') {
+                        totalDep += v;
+                        if (m.dataISO === hojeISO) balancoDia += v;
+                    }
+                    if (m.tipo === 'saque') {
+                        totalSaq += v;
+                        if (m.dataISO === hojeISO) balancoDia -= v;
+                    }
                 });
 
+                // ✅ CÁLCULO DO SALDO — INCLUI DEPÓSITO E SAQUE
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
-                const rentabilidade = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2) : '0.00';
+                const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
-                // Atualiza tela
+                let diferencaDias = 0;
+                if (apostas.length > 0 && dataInicial) {
+                    const hoje = new Date();
+                    const diferencaMs = hoje - dataInicial;
+                    diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+                }
+
+                const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+
                 document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
                 document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
-                document.getElementById('balancoDia').textContent = `R$ ${formatarParaExibicao(balancoDia)}`;
-                document.getElementById('balancoDia').className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
-                document.getElementById('rentabilidadeTotal').textContent = `${rentabilidade.replace('.', ',')}%`;
+
+                const balancoDiaEl = document.getElementById('balancoDia');
+                balancoDiaEl.textContent = `R$ ${formatarParaExibicao(balancoDia)}`;
+                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+
+                document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
                 document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
-                document.getElementById('balancoTotal').textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
-                document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
+                const balancoTotalEl = document.getElementById('balancoTotal');
+                balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+                balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
+                document.getElementById('tempoTotal').textContent = tempoTexto;
                 document.getElementById('totalApostas').textContent = apostas.length;
 
                 grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
@@ -471,43 +746,75 @@
                 atualizarHistorico();
 
             } catch (erro) {
-                console.error('Erro ao carregar dados:', erro);
-                alert('Erro ao carregar dados. Verifique sua conexão.');
+                console.error('Erro:', erro);
+                // Se der erro, volta ao comportamento original sem quebrar
+                const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                atualizarHistorico();
             }
         }
 
+        // ✅ HISTÓRICO AGORA MOSTRA APOSTAS + DEPÓSITOS + SAQUES
         function atualizarHistorico() {
             const lista = document.getElementById('listaHistorico');
             const todos = [...movimentacoes, ...apostas].sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            if (!todos.length) {
-                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhum registro encontrado</p></div>`;
+            
+            if (todos.length === 0) {
+                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhum registro ainda</p></div>`;
                 return;
             }
+
             lista.innerHTML = '';
             todos.forEach(item => {
                 if (item.tipo === 'deposito') {
-                    lista.innerHTML += `<div class="aposta-item mov-dep rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa fa-plus"></i></div>
-                        <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div></div>
-                        <p class="font-semibold text-green-600">+ R$ ${formatarParaExibicao(item.valor)}</p></div>`;
+                    lista.innerHTML += `
+                    <div class="aposta-item mov-dep rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa fa-plus"></i></div>
+                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div>
+                        </div>
+                        <p class="font-semibold text-green-600">+ R$ ${formatarParaExibicao(item.valor)}</p>
+                    </div>`;
                 } else if (item.tipo === 'saque') {
-                    lista.innerHTML += `<div class="aposta-item mov-saq rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center"><i class="fa fa-minus"></i></div>
-                        <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div></div>
-                        <p class="font-semibold text-red-600">- R$ ${formatarParaExibicao(item.valor)}</p></div>`;
+                    lista.innerHTML += `
+                    <div class="aposta-item mov-saq rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center"><i class="fa fa-minus"></i></div>
+                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div>
+                        </div>
+                        <p class="font-semibold text-red-600">- R$ ${formatarParaExibicao(item.valor)}</p>
+                    </div>`;
                 } else {
                     const cor = item.resultado === 'green' ? 'text-green' : item.resultado === 'red' ? 'text-red' : 'text-yellow-600';
-                    const icone = item.resultado === 'green' ? 'fa-arrow-up' : item.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh';
-                    lista.innerHTML += `<div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex justify-between items-center" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
-                        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-100 ${cor} flex items-center justify-center"><i class="fa ${icone}"></i></div>
-                        <div><p class="font-medium">${item.obs || 'Aposta'}</p><p class="text-sm text-gray-600">R$ ${formatarParaExibicao(item.valor)} • Odd ${item.odd.toFixed(2)}</p>
-                        <p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div></div>
-                        <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p></div>`;
+                    const corClara = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
+                    const status = item.resultado === 'green' ? '🟢 Green' : item.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
+                    lista.innerHTML += `
+                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
+                                <i class="fa ${item.resultado === 'green' ? 'fa-arrow-up' : item.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">${item.obs || 'Aposta'}</p>
+                                <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(item.valor)}</p>
+                                <p class="text-xs text-gray-500">Odd: ${item.odd.toFixed(2)} ${item.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(item.valorCashout)}` : ''}</p>
+                                <p class="text-xs text-gray-400">${item.data}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
+                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p>
+                        </div>
+                    </div>`;
                 }
             });
         }
 
-        window.onload = () => { iniciarGrafico(); atualizarDados(); };
+        window.onload = () => {
+            iniciarGrafico();
+            atualizarDados();
+        };
     </script>
 </body>
 </html>
