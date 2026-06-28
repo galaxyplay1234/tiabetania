@@ -291,8 +291,8 @@
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
                         <div class="flex gap-2">
-                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Ganha</div>
-                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Perdida</div>
+                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Green</div>
+                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Red</div>
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                     </div>
@@ -655,7 +655,7 @@ async function atualizarDados() {
             apostas.forEach(a => {
                 const cor = a.resultado === 'green' ? 'text-green' : a.resultado === 'red' ? 'text-red' : 'text-yellow-600';
                 const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
-                const status = a.resultado === 'green' ? '🟢 Ganha' : a.resultado === 'red' ? '🔴 Perdida' : '🟡 Cashout';
+                const status = a.resultado === 'green' ? '🟢 Green' : a.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
                 lista.innerHTML += `
                 <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})'>
                     <div class="flex items-center gap-3">
