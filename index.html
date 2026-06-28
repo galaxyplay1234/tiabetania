@@ -205,7 +205,7 @@
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
-                    <p class="text-gray-500 text-sm mt-4">Quantidade de Ganha, Perdida e Cashout</p>
+                    <p class="text-gray-500 text-sm mt-4">Quantidade de Green, Red e Cashout</p>
                 </div>
             </div>
 
@@ -508,7 +508,7 @@
             const obs = document.getElementById('observacao').value;
 
             if (!resultado) {
-                alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
+                alert('Selecione o resultado: Green, Red ou Cashout!');
                 return;
             }
             if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
