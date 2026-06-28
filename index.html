@@ -819,26 +819,43 @@ try {
                 return;
             }
 
-            lista.innerHTML = '';
-            todos.forEach(item => {
-                if (item.tipo === 'deposito') {
-                    lista.innerHTML += `
-                    <div class="aposta-item mov-dep rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa fa-plus"></i></div>
-                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div>
-                        </div>
-                        <p class="font-semibold text-green-600">+ R$ ${formatarParaExibicao(item.valor)}</p>
-                    </div>`;
+            lista.innerHTML += `
+<div class="aposta-item mov-dep rounded-xl p-4 flex justify-between items-center shadow-sm"
+     onclick="excluirMovimentacao('${item.id}')">
+
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+            <i class="fa fa-plus"></i>
+        </div>
+        <div>
+            <p class="font-medium">${item.obs}</p>
+            <p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p>
+        </div>
+    </div>
+
+    <p class="font-semibold text-green-600">
+        + R$ ${formatarParaExibicao(item.valor)}
+    </p>
+</div>`;
                 } else if (item.tipo === 'saque') {
                     lista.innerHTML += `
-                    <div class="aposta-item mov-saq rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center"><i class="fa fa-minus"></i></div>
-                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p></div>
-                        </div>
-                        <p class="font-semibold text-red-600">- R$ ${formatarParaExibicao(item.valor)}</p>
-                    </div>`;
+<div class="aposta-item mov-saq rounded-xl p-4 flex justify-between items-center shadow-sm"
+     onclick="excluirMovimentacao('${item.id}')">
+
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+            <i class="fa fa-minus"></i>
+        </div>
+        <div>
+            <p class="font-medium">${item.obs}</p>
+            <p class="text-xs text-gray-500">${formatarDataExibicao(item.dataISO)}</p>
+        </div>
+    </div>
+
+    <p class="font-semibold text-red-600">
+        - R$ ${formatarParaExibicao(item.valor)}
+    </p>
+</div>`;
                 } else {
                     const cor = item.resultado === 'green' ? 'text-green' : item.resultado === 'red' ? 'text-red' : 'text-yellow-600';
                     const corClara = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
@@ -864,6 +881,20 @@ try {
                 }
             });
         }
+
+
+async function excluirMovimentacao(id) {
+    if (!confirm('Deseja excluir esta movimentação?')) return;
+
+    try {
+        await deleteDoc(doc(db, 'movimentacoes', id));
+        atualizarDados();
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
+    }
+}
+
 
         window.onload = () => {
             iniciarGrafico();
