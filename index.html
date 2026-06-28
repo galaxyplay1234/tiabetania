@@ -13,6 +13,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
+        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
             authDomain: "tiabetania.firebaseapp.com",
@@ -23,9 +24,11 @@
             measurementId: "G-M01M8ZYK9D"
         };
 
+        // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Disponibiliza para o resto do código
         window.db = db;
         window.doc = doc;
         window.setDoc = setDoc;
@@ -360,6 +363,7 @@
         let bancaInicial = 0;
         let grafico;
 
+        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -416,23 +420,23 @@
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 14 } } },
                         tooltip: { enabled: false }
-                    },
-                    plugins: [{
-                        id: 'textoQuantidade',
-                        afterDatasetsDraw: function(chart) {
-                            const { ctx, data } = chart;
-                            ctx.font = 'bold 16px SF Pro Display';
-                            ctx.fillStyle = '#FFFFFF';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            const meta = chart.getDatasetMeta(0);
-                            meta.data.forEach((fatia, i) => {
-                                const pos = fatia.tooltipPosition();
-                                if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
-                            });
-                        }
-                    }]
-                }
+                    }
+                },
+                plugins: [{
+                    id: 'textoQuantidade',
+                    afterDatasetsDraw: function(chart) {
+                        const { ctx, data } = chart;
+                        ctx.font = 'bold 16px SF Pro Display';
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((fatia, i) => {
+                            const pos = fatia.tooltipPosition();
+                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
+                        });
+                    }
+                }]
             });
         }
 
@@ -452,7 +456,7 @@
             }
         }
 
-        // 📥 Banca
+        // 📥 Buscar banca do Firebase
         async function abrirModalBanca() {
             const docRef = doc(db, 'configuracoes', 'banca');
             const docSnap = await getDoc(docRef);
@@ -469,6 +473,7 @@
             document.body.style.overflow = 'auto';
         }
 
+        // 💾 Salvar banca no Firebase
         async function salvarBanca(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('inputBanca').value);
@@ -579,6 +584,7 @@
             document.body.style.overflow = 'auto';
         }
 
+        // 💾 Salvar/Editar aposta no Firebase
         async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
@@ -638,6 +644,7 @@
             atualizarDados();
         }
 
+        // 🗑️ Excluir aposta do Firebase
         async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
             if (!id) return;
@@ -648,15 +655,18 @@
             }
         }
 
-        // ✅ Cálculo ORIGINAL preservado + Depósito/Saque sem apagar nada
+        // ✅ CÁLCULO ORIGINAL PRESERVADO 100% — não zera mais
         async function atualizarDados() {
+            // Busca banca
             const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
             bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-            const qApostas = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
-            const snapApostas = await getDocs(qApostas);
-            apostas = snapApostas.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Busca todas as apostas ordenadas por data
+            const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+            const snapshot = await getDocs(q);
+            apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+            // Busca movimentações
             const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
             const snapMov = await getDocs(qMov);
             movimentacoes = snapMov.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -665,7 +675,7 @@
             const hojeISO = dataHojeLocal();
             let dataInicial = null;
 
-            // Cálculo das apostas igual ao código original
+            // Percorre todas as apostas e soma CORRETAMENTE como era antes
             apostas.forEach(a => {
                 const valor = a.valor || 0;
                 const lucro = a.lucro || 0;
@@ -677,13 +687,19 @@
                 else if (a.resultado === 'red') qtdRed++;
                 else if (a.resultado === 'cashout') qtdCashout++;
 
-                if (a.dataISO === hojeISO) balancoDia += lucro;
+                // ✅ CORREÇÃO: Compara diretamente a data no formato ISO
+                if (a.dataISO === hojeISO) {
+                    balancoDia += lucro;
+                }
 
+                // Define a data mais antiga para calcular o tempo total
                 const dataAtual = new Date(a.dataISO);
-                if (!dataInicial || dataAtual < dataInicial) dataInicial = dataAtual;
+                if (!dataInicial || dataAtual < dataInicial) {
+                    dataInicial = dataAtual;
+                }
             });
 
-            // Adiciona depósitos e saques sem alterar a lógica das apostas
+            // Adiciona depósitos e saques sem alterar o cálculo original
             let totalDep = 0, totalSaq = 0;
             movimentacoes.forEach(m => {
                 if (m.tipo === 'deposito') {
@@ -711,9 +727,15 @@
             document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
             document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
 
+            // ✅ Exibe balanço do dia com valor e cor corretos
             const balancoDiaEl = document.getElementById('balancoDia');
-            balancoDiaEl.textContent = `R$ ${formatarParaExibicao(balancoDia)}`;
-            balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+            if (balancoDia !== 0) {
+                balancoDiaEl.textContent = `R$ ${formatarParaExibicao(balancoDia)}`;
+                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+            } else {
+                balancoDiaEl.textContent = 'R$ 0,00';
+                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
+            }
 
             document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
             document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
