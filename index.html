@@ -8,12 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
             authDomain: "tiabetania.firebaseapp.com",
@@ -24,11 +22,9 @@
             measurementId: "G-M01M8ZYK9D"
         };
 
-        // Inicializa o Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Disponibiliza para o resto do código
         window.db = db;
         window.doc = doc;
         window.setDoc = setDoc;
@@ -68,116 +64,26 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .no-select {
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
-            .glass {
-                background: rgba(255, 255, 255, 0.85);
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            }
-            .btn-header {
-                width: 42px;
-                height: 42px;
-                border-radius: 50%;
-                background: rgba(0, 0, 0, 0.06);
-                display: grid;
-                place-items: center;
-                font-size: 20px;
-                font-weight: 500;
-                transition: background 0.2s ease;
-            }
-            .btn-header:hover {
-                background: rgba(0, 0, 0, 0.1);
-            }
-            .tab-menu {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 4px;
-                width: 100%;
-                height: 100%;
-                border-radius: 14px;
-                transition: background 0.2s ease;
-            }
-            .tab-active {
-                background-color: #E5E5EA;
-                color: #000000;
-            }
-            .tab-inactive {
-                color: #86868B;
-            }
-            .btn-resultado {
-                flex: 1;
-                padding: 12px 6px;
-                border-radius: 12px;
-                border: 1px solid #E0E0E0;
-                text-align: center;
-                font-weight: 500;
-                font-size: 13px;
-                transition: all 0.2s ease;
-                cursor: pointer;
-            }
-            .btn-green.active {
-                background-color: #E8F5E9;
-                border-color: #A5D6A7;
-                color: #2E7D32;
-            }
-            .btn-red.active {
-                background-color: #FFEBEE;
-                border-color: #EF9A9A;
-                color: #C62828;
-            }
-            .btn-cashout.active {
-                background-color: #FFFBEB;
-                border-color: #FDE68A;
-                color: #92720E;
-            }
-            .aposta-item {
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-            .aposta-item:hover {
-                background-color: #F9F9F9;
-            }
-            .movimentacao-item {
-                background: #F8FAFC;
-                border-left: 4px solid;
-            }
-            .movimentacao-deposito {
-                border-color: #10B981;
-            }
-            .movimentacao-saque {
-                border-color: #EF4444;
-            }
+            .no-select { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+            .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(0,0,0,0.06); }
+            .btn-header { width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.06); display: grid; place-items: center; font-size: 20px; font-weight: 500; transition: background 0.2s; }
+            .btn-header:hover { background: rgba(0,0,0,0.1); }
+            .tab-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 100%; border-radius: 14px; transition: background 0.2s; }
+            .tab-active { background-color: #E5E5EA; color: #000; }
+            .tab-inactive { color: #86868B; }
+            .btn-resultado { flex: 1; padding: 12px 6px; border-radius: 12px; border: 1px solid #E0E0E0; text-align: center; font-weight: 500; font-size: 13px; transition: all 0.2s; cursor: pointer; }
+            .btn-green.active { background: #E8F5E9; border-color: #A5D6A7; color: #2E7D32; }
+            .btn-red.active { background: #FFEBEE; border-color: #EF9A9A; color: #C62828; }
+            .btn-cashout.active { background: #FFFBEB; border-color: #FDE68A; color: #92720E; }
+            .aposta-item { cursor: pointer; transition: background 0.2s; }
+            .aposta-item:hover { background: #F9F9F9; }
+            .mov-dep { border-left: 4px solid #10B981; background: #F0FDF4; }
+            .mov-saq { border-left: 4px solid #EF4444; background: #FEF2F2; }
             .scrollbar-hide::-webkit-scrollbar { display: none; }
             .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-
-            input[type="date"] {
-                -webkit-appearance: none;
-                appearance: none;
-                background-color: #ffffff;
-                color: #111827;
-                text-align: left;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 12px center;
-                background-size: 20px;
-                padding-right: 40px;
-            }
+            input[type="date"] { -webkit-appearance: none; appearance: none; background: #fff; color: #111; padding: 12px 40px 12px 12px; border-radius: 12px; border: 1px solid #E5E7EB; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2386868B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' /%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 18px; }
         }
-
-        html, body {
-            overscroll-behavior: none;
-            touch-action: pan-x pan-y;
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            background: #F2F2F7;
-        }
+        html, body { overscroll-behavior: none; touch-action: pan-x pan-y; font-family: 'SF Pro Display', sans-serif; background: #F2F2F7; }
     </style>
 </head>
 <body class="text-gray-900 no-select">
@@ -266,64 +172,51 @@
 
         <!-- Modal Depósito -->
         <div id="modalDeposito" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Novo Depósito</h3>
                     <button onclick="fecharModalDeposito()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarDeposito(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Valor (R$)</label>
-                        <input type="text" id="valorDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Ex: 30,00" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
-                        <input type="text" id="obsDeposito" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="Ex: Pix, Transferência...">
-                    </div>
-                    <button type="submit" class="w-full bg-green hover:bg-green/90 text-white font-medium rounded-xl p-3.5 mt-3">Registrar Depósito</button>
+                    <input type="text" id="valorDeposito" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 30,00" required>
+                    <input type="text" id="obsDeposito" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Observação (opcional)">
+                    <button type="submit" class="w-full bg-green text-white rounded-xl p-3.5 font-medium">Salvar Depósito</button>
                 </form>
             </div>
         </div>
 
         <!-- Modal Saque -->
         <div id="modalSaque" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Novo Saque</h3>
                     <button onclick="fecharModalSaque()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarSaque(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Valor (R$)</label>
-                        <input type="text" id="valorSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Ex: 20,00" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
-                        <input type="text" id="obsSaque" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-red-400" placeholder="Ex: Retirada, Lucro...">
-                    </div>
-                    <button type="submit" class="w-full bg-red hover:bg-red/90 text-white font-medium rounded-xl p-3.5 mt-3">Registrar Saque</button>
+                    <input type="text" id="valorSaque" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 20,00" required>
+                    <input type="text" id="obsSaque" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Observação (opcional)">
+                    <button type="submit" class="w-full bg-red text-white rounded-xl p-3.5 font-medium">Salvar Saque</button>
                 </form>
             </div>
         </div>
 
+        <!-- Modal Banca -->
         <div id="modalBanca" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
                 <div class="flex justify-between items-center mb-5">
                     <h3 class="text-xl font-semibold">Definir Banca Inicial</h3>
                     <button onclick="fecharModalBanca()" class="btn-header">×</button>
                 </div>
                 <form onsubmit="salvarBanca(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Valor da Banca (R$)</label>
-                        <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1000,00" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5 mt-3">Salvar Banca</button>
+                    <input type="text" id="inputBanca" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 1000,00" required>
+                    <button type="submit" class="w-full bg-blue text-white rounded-xl p-3.5 font-medium">Salvar</button>
                 </form>
             </div>
         </div>
 
+        <!-- Modal Aposta -->
         <div id="modalAposta" class="fixed inset-0 bg-black/50 flex items-end justify-center z-50 hidden">
-            <div class="bg-white rounded-t-3xl w-full max-w-md p-6 transform transition-all duration-300">
+            <div class="bg-white rounded-t-3xl w-full max-w-md p-6">
                 <div class="flex justify-between items-center mb-5">
                     <h3 id="tituloModal" class="text-xl font-semibold">Nova Aposta</h3>
                     <button onclick="fecharModal()" class="btn-header">×</button>
@@ -334,12 +227,12 @@
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Valor Apostado (R$)</label>
-                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 10,00" required>
+                        <input type="text" id="valorApostado" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 10,00" required>
                     </div>
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Odd</label>
-                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: 1.75" required>
+                        <input type="text" id="odd" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: 1.75" required>
                     </div>
 
                     <div>
@@ -353,22 +246,22 @@
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Data da Aposta</label>
-                        <input type="date" id="dataAposta" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                        <input type="date" id="dataAposta" class="w-full">
                     </div>
 
                     <div id="campoValorCashout" class="hidden">
                         <label class="block text-sm text-gray-600 mb-1">Valor Recebido no Cashout (R$)</label>
-                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-yellow-400" placeholder="Ex: 25,30">
+                        <input type="text" id="valorCashout" class="w-full border border-yellow-200 bg-yellow-50 rounded-xl p-3.5" placeholder="Ex: 25,30">
                     </div>
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-1">Observação (opcional)</label>
-                        <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5 focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="Ex: Futebol, Basquete...">
+                        <input type="text" id="observacao" class="w-full border border-gray-200 rounded-xl p-3.5" placeholder="Ex: Futebol...">
                     </div>
 
                     <div class="flex gap-3 mt-3">
-                        <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red font-medium rounded-xl p-3.5">Excluir</button>
-                        <button type="submit" class="flex-1 bg-blue hover:bg-blue/90 text-white font-medium rounded-xl p-3.5">Salvar</button>
+                        <button type="button" onclick="excluirAposta()" id="btnExcluir" class="hidden w-1/3 bg-red/10 text-red rounded-xl p-3.5 font-medium">Excluir</button>
+                        <button type="submit" class="flex-1 bg-blue text-white rounded-xl p-3.5 font-medium">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -381,7 +274,6 @@
         let bancaInicial = 0;
         let grafico;
 
-        // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
             const hoje = new Date();
             const ano = hoje.getFullYear();
@@ -400,86 +292,47 @@
             return (valor || 0).toFixed(2).replace('.', ',');
         }
 
-        function converterParaNumero(valorTexto) {
-            return parseFloat(valorTexto.replace(',', '.')) || 0;
+        function converterParaNumero(texto) {
+            return parseFloat(texto.replace(',', '.')) || 0;
         }
 
         function formatarMoeda(input) {
-            let valor = input.value.replace(/\D/g, '');
-            if (valor === '') { input.value = ''; return; }
-            valor = (valor / 100).toFixed(2);
-            valor = valor.replace('.', ',');
-            input.value = valor;
+            let v = input.value.replace(/\D/g, '');
+            if (!v) { input.value = ''; return; }
+            v = (v / 100).toFixed(2).replace('.', ',');
+            input.value = v;
         }
 
         function formatarOdd(input) {
-            let valor = input.value.replace(',', '.').replace(/[^\d.]/g, '');
-            const partes = valor.split('.');
-            if (partes.length > 2) valor = partes[0] + '.' + partes[1];
-            input.value = valor;
+            let v = input.value.replace(',', '.').replace(/[^\d.]/g, '');
+            const partes = v.split('.');
+            if (partes.length > 2) v = partes[0] + '.' + partes[1];
+            input.value = v;
         }
 
         function iniciarGrafico() {
             const ctx = document.getElementById('graficoResultados').getContext('2d');
             grafico = new Chart(ctx, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Green', 'Red', 'Cashout'],
-                    datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 14 } } },
-                        tooltip: { enabled: false }
-                    }
-                },
-                plugins: [{
-                    id: 'textoQuantidade',
-                    afterDatasetsDraw: function(chart) {
-                        const { ctx, data } = chart;
-                        ctx.font = 'bold 16px SF Pro Display';
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        const meta = chart.getDatasetMeta(0);
-                        meta.data.forEach((fatia, i) => {
-                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], fatia.tooltipPosition().x, fatia.tooltipPosition().y);
-                        });
-                    }
-                }]
+                data: { labels: ['Green', 'Red', 'Cashout'], datasets: [{ data: [0,0,0], backgroundColor: ['#34C759','#FF3B30','#FFCC00'], borderWidth:0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' }, tooltip: { enabled: false } } }
             });
         }
 
         function mudarPagina(pagina) {
             document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
             document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
-            if (pagina === 'home') {
-                document.getElementById('tabHome').classList.add('tab-active');
-                document.getElementById('tabHome').classList.remove('tab-inactive');
-                document.getElementById('tabHistorico').classList.add('tab-inactive');
-                document.getElementById('tabHistorico').classList.remove('tab-active');
-            } else {
-                document.getElementById('tabHistorico').classList.add('tab-active');
-                document.getElementById('tabHistorico').classList.remove('tab-inactive');
-                document.getElementById('tabHome').classList.add('tab-inactive');
-                document.getElementById('tabHome').classList.remove('tab-active');
-            }
+            document.getElementById('tabHome').classList.toggle('tab-active', pagina === 'home');
+            document.getElementById('tabHome').classList.toggle('tab-inactive', pagina !== 'home');
+            document.getElementById('tabHistorico').classList.toggle('tab-active', pagina === 'historico');
+            document.getElementById('tabHistorico').classList.toggle('tab-inactive', pagina !== 'historico');
         }
 
-        // 📥 Buscar banca do Firebase
         async function abrirModalBanca() {
             const docRef = doc(db, 'configuracoes', 'banca');
-            const docSnap = await getDoc(docRef);
-            bancaInicial = docSnap.exists() ? docSnap.data().valor : 0;
+            const snap = await getDoc(docRef);
+            bancaInicial = snap.exists() ? snap.data().valor : 0;
             document.getElementById('modalBanca').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
             const input = document.getElementById('inputBanca');
             input.value = bancaInicial > 0 ? formatarParaExibicao(bancaInicial) : '';
             input.oninput = () => formatarMoeda(input);
@@ -487,99 +340,52 @@
 
         function fecharModalBanca() {
             document.getElementById('modalBanca').classList.add('hidden');
-            document.body.style.overflow = 'auto';
         }
 
-        // 💾 Salvar banca no Firebase
         async function salvarBanca(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('inputBanca').value);
-            if (!isNaN(valor) && valor >= 0) {
+            if (valor >= 0) {
                 await setDoc(doc(db, 'configuracoes', 'banca'), { valor });
                 fecharModalBanca();
                 atualizarDados();
-            } else {
-                alert('Digite um valor válido!');
-            }
+            } else alert('Valor inválido!');
         }
 
-        // 📥 Modais Depósito e Saque
         function abrirModalDeposito() {
             document.getElementById('modalDeposito').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            const input = document.getElementById('valorDeposito');
-            input.oninput = () => formatarMoeda(input);
-            input.value = '';
-            document.getElementById('obsDeposito').value = '';
+            const inp = document.getElementById('valorDeposito');
+            inp.value = '';
+            inp.oninput = () => formatarMoeda(inp);
         }
+        function fecharModalDeposito() { document.getElementById('modalDeposito').classList.add('hidden'); }
 
-        function fecharModalDeposito() {
-            document.getElementById('modalDeposito').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function abrirModalSaque() {
-            document.getElementById('modalSaque').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            const input = document.getElementById('valorSaque');
-            input.oninput = () => formatarMoeda(input);
-            input.value = '';
-            document.getElementById('obsSaque').value = '';
-        }
-
-        function fecharModalSaque() {
-            document.getElementById('modalSaque').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // 💾 Salvar Depósito
         async function salvarDeposito(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('valorDeposito').value);
             const obs = document.getElementById('obsDeposito').value || 'Depósito';
             const dataISO = dataHojeLocal();
-            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
-
-            if (valor <= 0) {
-                alert('Digite um valor maior que zero!');
-                return;
-            }
-
-            await addDoc(collection(db, 'movimentacoes'), {
-                tipo: 'deposito',
-                valor,
-                obs,
-                dataISO,
-                data: formatarDataExibicao(dataISO),
-                timestamp
-            });
-
+            if (valor <= 0) return alert('Valor inválido!');
+            await addDoc(collection(db, 'movimentacoes'), { tipo: 'deposito', valor, obs, dataISO, timestamp: new Date(dataISO + 'T12:00:00').getTime() });
             fecharModalDeposito();
             atualizarDados();
         }
 
-        // 💾 Salvar Saque
+        function abrirModalSaque() {
+            document.getElementById('modalSaque').classList.remove('hidden');
+            const inp = document.getElementById('valorSaque');
+            inp.value = '';
+            inp.oninput = () => formatarMoeda(inp);
+        }
+        function fecharModalSaque() { document.getElementById('modalSaque').classList.add('hidden'); }
+
         async function salvarSaque(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('valorSaque').value);
             const obs = document.getElementById('obsSaque').value || 'Saque';
             const dataISO = dataHojeLocal();
-            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
-
-            if (valor <= 0) {
-                alert('Digite um valor maior que zero!');
-                return;
-            }
-
-            await addDoc(collection(db, 'movimentacoes'), {
-                tipo: 'saque',
-                valor,
-                obs,
-                dataISO,
-                data: formatarDataExibicao(dataISO),
-                timestamp
-            });
-
+            if (valor <= 0) return alert('Valor inválido!');
+            await addDoc(collection(db, 'movimentacoes'), { tipo: 'saque', valor, obs, dataISO, timestamp: new Date(dataISO + 'T12:00:00').getTime() });
             fecharModalSaque();
             atualizarDados();
         }
@@ -594,32 +400,27 @@
 
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-
-            const valorApostaInput = document.getElementById('valorApostado');
-            const valorCashoutInput = document.getElementById('valorCashout');
-            const oddInput = document.getElementById('odd');
-            const dataInput = document.getElementById('dataAposta');
-
-            valorApostaInput.oninput = () => formatarMoeda(valorApostaInput);
-            valorCashoutInput.oninput = () => formatarMoeda(valorCashoutInput);
-            oddInput.oninput = () => formatarOdd(oddInput);
-
+            const vA = document.getElementById('valorApostado');
+            const vC = document.getElementById('valorCashout');
+            const odd = document.getElementById('odd');
+            vA.oninput = () => formatarMoeda(vA);
+            vC.oninput = () => formatarMoeda(vC);
+            odd.oninput = () => formatarOdd(odd);
             if (aposta) {
                 document.getElementById('tituloModal').textContent = 'Editar Aposta';
                 document.getElementById('idAposta').value = aposta.id;
-                valorApostaInput.value = formatarParaExibicao(aposta.valor);
-                oddInput.value = aposta.odd.toFixed(2);
-                dataInput.value = aposta.dataISO || dataHojeLocal();
+                vA.value = formatarParaExibicao(aposta.valor);
+                odd.value = aposta.odd.toFixed(2);
+                document.getElementById('dataAposta').value = aposta.dataISO || dataHojeLocal();
                 document.getElementById('observacao').value = aposta.obs || '';
-                valorCashoutInput.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
+                vC.value = aposta.valorCashout ? formatarParaExibicao(aposta.valorCashout) : '';
                 selecionarResultado(aposta.resultado);
                 document.getElementById('btnExcluir').classList.remove('hidden');
             } else {
                 document.getElementById('tituloModal').textContent = 'Nova Aposta';
                 document.getElementById('formAposta').reset();
                 document.getElementById('idAposta').value = '';
-                dataInput.value = dataHojeLocal();
+                document.getElementById('dataAposta').value = dataHojeLocal();
                 selecionarResultado('');
                 document.getElementById('btnExcluir').classList.add('hidden');
             }
@@ -627,10 +428,8 @@
 
         function fecharModal() {
             document.getElementById('modalAposta').classList.add('hidden');
-            document.body.style.overflow = 'auto';
         }
 
-        // 💾 Salvar/Editar aposta no Firebase
         async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
@@ -638,151 +437,87 @@
             const odd = parseFloat(document.getElementById('odd').value);
             const dataISO = document.getElementById('dataAposta').value;
             const resultado = document.getElementById('resultado').value;
-            const valorCashoutTexto = document.getElementById('valorCashout').value.trim();
-            const valorCashout = valorCashoutTexto ? converterParaNumero(valorCashoutTexto) : null;
+            const valorCashout = resultado === 'cashout' ? converterParaNumero(document.getElementById('valorCashout').value) : null;
             const obs = document.getElementById('observacao').value;
 
-            if (!resultado) {
-                alert('Selecione o resultado: Green, Red ou Cashout!');
-                return;
-            }
-            if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
-                alert('Informe um valor válido para o Cashout!');
-                return;
-            }
-            if (!dataISO) {
-                alert('Selecione a data da aposta!');
-                return;
-            }
-            if (isNaN(odd) || odd < 1.01) {
-                alert('Digite uma odd válida (ex: 1.50)!');
-                return;
-            }
-
-            const dataFormatada = formatarDataExibicao(dataISO);
-            const timestamp = new Date(dataISO + 'T12:00:00').getTime();
+            if (!resultado) return alert('Selecione o resultado!');
+            if (resultado === 'cashout' && !valorCashout) return alert('Informe o valor do cashout!');
+            if (!dataISO) return alert('Escolha a data!');
+            if (isNaN(odd) || odd < 1.01) return alert('Odd inválida!');
 
             let lucro, retorno;
-            if (resultado === 'green') {
-                retorno = valor * odd;
-                lucro = retorno - valor;
-            } else if (resultado === 'red') {
-                retorno = 0;
-                lucro = -valor;
-            } else {
-                retorno = valorCashout;
-                lucro = valorCashout - valor;
-            }
+            if (resultado === 'green') { retorno = valor * odd; lucro = retorno - valor; }
+            else if (resultado === 'red') { retorno = 0; lucro = -valor; }
+            else { retorno = valorCashout; lucro = valorCashout - valor; }
 
-            const dados = {
-                valor, odd, dataISO, data: dataFormatada,
-                valorCashout: resultado === 'cashout' ? valorCashout : null,
-                retorno, lucro, resultado, obs, timestamp
-            };
+            const dados = { valor, odd, dataISO, data: formatarDataExibicao(dataISO), valorCashout, retorno, lucro, resultado, obs, timestamp: new Date(dataISO + 'T12:00:00').getTime() };
 
-            if (id) {
-                await updateDoc(doc(db, 'apostas', id), dados);
-            } else {
-                await addDoc(collection(db, 'apostas'), dados);
-            }
+            if (id) await updateDoc(doc(db, 'apostas', id), dados);
+            else await addDoc(collection(db, 'apostas'), dados);
 
             fecharModal();
             atualizarDados();
         }
 
-        // 🗑️ Excluir aposta do Firebase
         async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
-            if (!id) return;
-            if (confirm('Deseja excluir esta aposta?')) {
-                await deleteDoc(doc(db, 'apostas', id));
-                fecharModal();
-                atualizarDados();
-            }
+            if (!id || !confirm('Excluir aposta?')) return;
+            await deleteDoc(doc(db, 'apostas', id));
+            fecharModal();
+            atualizarDados();
         }
 
-        // ✅ Atualizar todos os dados
+        // ✅ FUNÇÃO DE CÁLCULO RESTAURADA EXATAMENTE COMO ERA ANTES
         async function atualizarDados() {
-            // Busca banca
-            const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
-            bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+            const bancaSnap = await getDoc(doc(db, 'configuracoes', 'banca'));
+            bancaInicial = bancaSnap.exists() ? bancaSnap.data().valor : 0;
 
-            // Busca apostas
             const qApostas = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
             const snapApostas = await getDocs(qApostas);
-            apostas = snapApostas.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            apostas = snapApostas.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            // Busca movimentações
             const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
             const snapMov = await getDocs(qMov);
-            movimentacoes = snapMov.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            movimentacoes = snapMov.docs.map(d => ({ id: d.id, ...d.data() }));
 
             let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
-            let totalDepositos = 0, totalSaques = 0;
             const hojeISO = dataHojeLocal();
             let dataInicial = null;
 
-            // Processa apostas
+            // Calcula apostas como antes
             apostas.forEach(a => {
-                const valor = a.valor || 0;
-                const lucro = a.lucro || 0;
-
-                totalInvestido += valor;
-                totalLucro += lucro;
-
+                totalInvestido += a.valor || 0;
+                totalLucro += a.lucro || 0;
                 if (a.resultado === 'green') qtdGreen++;
                 else if (a.resultado === 'red') qtdRed++;
                 else if (a.resultado === 'cashout') qtdCashout++;
-
-                if (a.dataISO === hojeISO) balancoDia += lucro;
-
-                const dataAtual = new Date(a.dataISO);
-                if (!dataInicial || dataAtual < dataInicial) dataInicial = dataAtual;
+                if (a.dataISO === hojeISO) balancoDia += a.lucro || 0;
+                const d = new Date(a.dataISO);
+                if (!dataInicial || d < dataInicial) dataInicial = d;
             });
 
-            // Processa depósitos e saques
+            // Adiciona depósitos e saques ao saldo
+            let totalDep = 0, totalSaq = 0;
             movimentacoes.forEach(m => {
-                if (m.tipo === 'deposito') {
-                    totalDepositos += m.valor;
-                    if (m.dataISO === hojeISO) balancoDia += m.valor;
-                } else if (m.tipo === 'saque') {
-                    totalSaques += m.valor;
-                    if (m.dataISO === hojeISO) balancoDia -= m.valor;
-                }
+                if (m.tipo === 'deposito') { totalDep += m.valor; if (m.dataISO === hojeISO) balancoDia += m.valor; }
+                if (m.tipo === 'saque') { totalSaq += m.valor; if (m.dataISO === hojeISO) balancoDia -= m.valor; }
             });
 
-            // Cálculo final do saldo
-            const saldoAtual = bancaInicial + totalLucro + totalDepositos - totalSaques;
-            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
+            const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
+            const rentabilidade = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
-            let diferencaDias = 0;
-            if (apostas.length > 0 && dataInicial) {
-                const hoje = new Date();
-                const diferencaMs = hoje - dataInicial;
-                diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
-            }
-
-            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+            let dias = 0;
+            if (apostas.length && dataInicial) dias = Math.floor((new Date() - dataInicial) / 86400000) + 1;
+            const tempoTexto = dias < 30 ? `${dias} dias` : `${Math.floor(dias / 30)} meses`;
 
             document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
             document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
-
-            const balancoDiaEl = document.getElementById('balancoDia');
-            if (balancoDia !== 0) {
-                balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
-                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
-            } else {
-                balancoDiaEl.textContent = 'R$ 0,00';
-                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
-            }
-
-            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
+            document.getElementById('balancoDia').textContent = `R$ ${formatarParaExibicao(balancoDia)}`;
+            document.getElementById('balancoDia').className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidade}%`;
             document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
-
-            const balancoTotalEl = document.getElementById('balancoTotal');
-            balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
-            balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
-
+            document.getElementById('balancoTotal').textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+            document.getElementById('balancoTotal').className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
             document.getElementById('tempoTotal').textContent = tempoTexto;
             document.getElementById('totalApostas').textContent = apostas.length;
 
@@ -793,60 +528,39 @@
 
         function atualizarHistorico() {
             const lista = document.getElementById('listaHistorico');
-            const todosItens = [...movimentacoes, ...apostas].sort((a, b) => b.timestamp - a.timestamp);
-
-            if (todosItens.length === 0) {
-                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhuma movimentação registrada ainda</p></div>`;
+            const todos = [...movimentacoes, ...apostas].sort((a,b) => b.timestamp - a.timestamp);
+            if (!todos.length) {
+                lista.innerHTML = `<div class="text-center text-gray-400 py-10"><i class="fa fa-history text-4xl mb-3"></i><p>Nenhum registro</p></div>`;
                 return;
             }
-
             lista.innerHTML = '';
-            todosItens.forEach(item => {
-                if (item.tipo === 'deposito' || item.tipo === 'saque') {
-                    // Linha de depósito/saque
-                    const cor = item.tipo === 'deposito' ? 'text-green-600' : 'text-red-600';
-                    const classe = item.tipo === 'deposito' ? 'movimentacao-deposito' : 'movimentacao-saque';
-                    const icone = item.tipo === 'deposito' ? 'fa-plus-circle' : 'fa-minus-circle';
-                    const valorSinal = item.tipo === 'deposito' ? `+ R$ ${formatarParaExibicao(item.valor)}` : `- R$ ${formatarParaExibicao(item.valor)}`;
-
-                    lista.innerHTML += `
-                    <div class="aposta-item movimentacao-item ${classe} bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
+            todos.forEach(item => {
+                if (item.tipo === 'deposito') {
+                    lista.innerHTML += `<div class="aposta-item mov-dep rounded-xl p-4 flex justify-between items-center shadow-sm">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 ${cor}">
-                                <i class="fa ${icone}"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">${item.obs}</p>
-                                <p class="text-xs text-gray-400">${item.data}</p>
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa fa-plus"></i></div>
+                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${item.data}</p></div>
                         </div>
-                        <div class="text-right">
-                            <p class="font-semibold ${cor}">${valorSinal}</p>
+                        <p class="font-semibold text-green-600">+ R$ ${formatarParaExibicao(item.valor)}</p>
+                    </div>`;
+                } else if (item.tipo === 'saque') {
+                    lista.innerHTML += `<div class="aposta-item mov-saq rounded-xl p-4 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center"><i class="fa fa-minus"></i></div>
+                            <div><p class="font-medium">${item.obs}</p><p class="text-xs text-gray-500">${item.data}</p></div>
                         </div>
+                        <p class="font-semibold text-red-600">- R$ ${formatarParaExibicao(item.valor)}</p>
                     </div>`;
                 } else {
-                    // Linha de aposta
                     const cor = item.resultado === 'green' ? 'text-green' : item.resultado === 'red' ? 'text-red' : 'text-yellow-600';
-                    const corClara = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
-                    const status = item.resultado === 'green' ? '🟢 Green' : item.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
-
-                    lista.innerHTML += `
-                    <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
+                    const bg = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
+                    const ico = item.resultado === 'green' ? 'fa-arrow-up' : item.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh';
+                    lista.innerHTML += `<div class="aposta-item bg-white rounded-xl p-4 flex justify-between items-center shadow-sm" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
-                                <i class="fa ${item.resultado === 'green' ? 'fa-arrow-up' : item.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">${item.obs || 'Aposta'}</p>
-                                <p class="text-sm text-gray-600">Apostado: R$ ${formatarParaExibicao(item.valor)}</p>
-                                <p class="text-xs text-gray-500">Odd: ${item.odd.toFixed(2)} ${item.resultado === 'cashout' ? `• Recebido: R$ ${formatarParaExibicao(item.valorCashout)}` : ''}</p>
-                                <p class="text-xs text-gray-400">${item.data}</p>
-                            </div>
+                            <div class="w-10 h-10 rounded-full ${bg} ${cor} flex items-center justify-center"><i class="fa ${ico}"></i></div>
+                            <div><p class="font-medium">${item.obs || 'Aposta'}</p><p class="text-sm text-gray-600">R$ ${formatarParaExibicao(item.valor)} • Odd ${item.odd.toFixed(2)}</p><p class="text-xs text-gray-400">${item.data}</p></div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p>
-                        </div>
+                        <div class="text-right"><p class="text-xs ${cor}">${item.resultado.toUpperCase()}</p><p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p></div>
                     </div>`;
                 }
             });
