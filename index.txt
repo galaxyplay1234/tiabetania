@@ -7,6 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        // Sua configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXiD4nFUfJVXFJ7XUa6DWLndE0gEUJoO0",
+            authDomain: "tiabetania.firebaseapp.com",
+            projectId: "tiabetania",
+            storageBucket: "tiabetania.firebasestorage.app",
+            messagingSenderId: "230400218883",
+            appId: "1:230400218883:web:de615fa4e9ec521be77b36",
+            measurementId: "G-M01M8ZYK9D"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Disponibiliza para o resto do código
+        window.db = db;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.getDocs = getDocs;
+        window.addDoc = addDoc;
+        window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
+        window.collection = collection;
+        window.query = query;
+        window.orderBy = orderBy;
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -170,7 +205,7 @@
             <div class="bg-white rounded-2xl p-5 shadow-sm">
                 <div class="h-72 flex flex-col items-center justify-center">
                     <canvas id="graficoResultados" class="w-full h-full"></canvas>
-                    <p class="text-gray-500 text-sm mt-4">Quantidade de Ganha, Perdida e Cashout</p>
+                    <p class="text-gray-500 text-sm mt-4">Quantidade de Green, Red e Cashout</p>
                 </div>
             </div>
 
@@ -256,8 +291,8 @@
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
                         <div class="flex gap-2">
-                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Ganha</div>
-                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Perdida</div>
+                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Green</div>
+                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Red</div>
                             <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
                         </div>
                     </div>
@@ -287,8 +322,8 @@
     </div>
 
     <script>
-        let apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
-        let bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
+        let apostas = [];
+        let bancaInicial = 0;
         let grafico;
 
         // Função para pegar data de hoje no formato local
@@ -307,11 +342,11 @@
         }
 
         function formatarParaExibicao(valor) {
-            return valor.toFixed(2).replace('.', ',');
+            return (valor || 0).toFixed(2).replace('.', ',');
         }
 
         function converterParaNumero(valorTexto) {
-            return parseFloat(valorTexto.replace(',', '.'));
+            return parseFloat(valorTexto.replace(',', '.')) || 0;
         }
 
         function formatarMoeda(input) {
@@ -334,7 +369,7 @@
             grafico = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Ganha', 'Perdida', 'Cashout'],
+                    labels: ['Green', 'Red', 'Cashout'],
                     datasets: [{
                         data: [0, 0, 0],
                         backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
@@ -384,7 +419,11 @@
             }
         }
 
-        function abrirModalBanca() {
+        // 📥 Buscar banca do Firebase
+        async function abrirModalBanca() {
+            const docRef = doc(db, 'configuracoes', 'banca');
+            const docSnap = await getDoc(docRef);
+            bancaInicial = docSnap.exists() ? docSnap.data().valor : 0;
             document.getElementById('modalBanca').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             const input = document.getElementById('inputBanca');
@@ -397,12 +436,12 @@
             document.body.style.overflow = 'auto';
         }
 
-        function salvarBanca(e) {
+        // 💾 Salvar banca no Firebase
+        async function salvarBanca(e) {
             e.preventDefault();
             const valor = converterParaNumero(document.getElementById('inputBanca').value);
             if (!isNaN(valor) && valor >= 0) {
-                bancaInicial = valor;
-                localStorage.setItem('bancaInicial', valor);
+                await setDoc(doc(db, 'configuracoes', 'banca'), { valor });
                 fecharModalBanca();
                 atualizarDados();
             } else {
@@ -456,7 +495,8 @@
             document.body.style.overflow = 'auto';
         }
 
-        function salvarAposta(e) {
+        // 💾 Salvar/Editar aposta no Firebase
+        async function salvarAposta(e) {
             e.preventDefault();
             const id = document.getElementById('idAposta').value;
             const valor = converterParaNumero(document.getElementById('valorApostado').value);
@@ -468,7 +508,7 @@
             const obs = document.getElementById('observacao').value;
 
             if (!resultado) {
-                alert('Selecione o resultado: Ganha, Perdida ou Cashout!');
+                alert('Selecione o resultado: Green, Red ou Cashout!');
                 return;
             }
             if (resultado === 'cashout' && (!valorCashout || isNaN(valorCashout))) {
@@ -499,95 +539,111 @@
                 lucro = valorCashout - valor;
             }
 
+            const dados = {
+                valor, odd, dataISO, data: dataFormatada,
+                valorCashout: resultado === 'cashout' ? valorCashout : null,
+                retorno, lucro, resultado, obs, timestamp
+            };
+
             if (id) {
-                const indice = apostas.findIndex(a => a.id == id);
-                if (indice !== -1) {
-                    apostas[indice] = {
-                        ...apostas[indice],
-                        valor, odd, dataISO, data: dataFormatada,
-                        valorCashout: resultado === 'cashout' ? valorCashout : null,
-                        retorno, lucro, resultado, obs, timestamp
-                    };
-                }
+                await updateDoc(doc(db, 'apostas', id), dados);
             } else {
-                apostas.unshift({
-                    id: Date.now(), valor, odd, dataISO, data: dataFormatada,
-                    valorCashout: resultado === 'cashout' ? valorCashout : null,
-                    retorno, lucro, resultado, obs, timestamp
-                });
+                await addDoc(collection(db, 'apostas'), dados);
             }
 
-            localStorage.setItem('apostasBetania', JSON.stringify(apostas));
             fecharModal();
             atualizarDados();
         }
 
-        function excluirAposta() {
+        // 🗑️ Excluir aposta do Firebase
+        async function excluirAposta() {
             const id = document.getElementById('idAposta').value;
             if (!id) return;
             if (confirm('Deseja excluir esta aposta?')) {
-                apostas = apostas.filter(a => a.id != id);
-                localStorage.setItem('apostasBetania', JSON.stringify(apostas));
+                await deleteDoc(doc(db, 'apostas', id));
                 fecharModal();
                 atualizarDados();
             }
         }
 
-        // ✅ CÁLCULO CORRIGIDO DEFINITIVO
-        function atualizarDados() {
-            // Recarrega dados do armazenamento
-            apostas = JSON.parse(localStorage.getItem('apostasBetania')) || [];
-            bancaInicial = parseFloat(localStorage.getItem('bancaInicial')) || 0;
+        // ✅ CÁLCULO CORRIGIDO DEFINITIVO - Balanço do dia funcionando
+async function atualizarDados() {
+    // Busca banca
+    const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
+    bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
 
-            let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
-            const hojeISO = dataHojeLocal();
-            const dataInicial = apostas.length ? new Date(Math.min(...apostas.map(a => a.timestamp))) : new Date();
+    // Busca todas as apostas ordenadas por data
+    const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
+    const snapshot = await getDocs(q);
+    apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            // Percorre todas as apostas e soma corretamente
-            apostas.forEach(a => {
-                totalInvestido += a.valor;
-                totalLucro += a.lucro;
-                if (a.resultado === 'green') qtdGreen++;
-                else if (a.resultado === 'red') qtdRed++;
-                else qtdCashout++;
-                // ✅ Aqui soma o lucro/prejuízo COMPLETO do dia
-                if (a.dataISO === hojeISO) {
-                    balancoDia += a.lucro;
-                }
-            });
+    let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
+    const hojeISO = dataHojeLocal(); // formato: YYYY-MM-DD
+    let dataInicial = null;
 
-            const saldoAtual = bancaInicial + totalLucro;
-            const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
-            const diferencaDias = apostas.length ? Math.ceil((new Date() - dataInicial) / (1000 * 60 * 60 * 24)) : 0;
-            const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+    // Percorre todas as apostas e soma corretamente
+    apostas.forEach(a => {
+        const valor = a.valor || 0;
+        const lucro = a.lucro || 0;
 
-            document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
-            document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+        totalInvestido += valor;
+        totalLucro += lucro;
 
-            // ✅ Exibe balanço do dia com valor e cor corretos
-            const balancoDiaEl = document.getElementById('balancoDia');
-            if (balancoDia !== 0) {
-                balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
-                balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
-            } else {
-                balancoDiaEl.textContent = '--';
-                balancoDiaEl.className = 'text-lg font-medium text-gray-500';
-            }
+        if (a.resultado === 'green') qtdGreen++;
+        else if (a.resultado === 'red') qtdRed++;
+        else if (a.resultado === 'cashout') qtdCashout++;
 
-            document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
-            document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
-
-            const balancoTotalEl = document.getElementById('balancoTotal');
-            balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
-            balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
-
-            document.getElementById('tempoTotal').textContent = tempoTexto;
-            document.getElementById('totalApostas').textContent = apostas.length;
-
-            grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
-            grafico.update();
-            atualizarHistorico();
+        // ✅ CORREÇÃO: Compara diretamente a data no formato ISO
+        if (a.dataISO === hojeISO) {
+            balancoDia += lucro;
         }
+
+        // Define a data mais antiga para calcular o tempo total
+        const dataAtual = new Date(a.dataISO);
+        if (!dataInicial || dataAtual < dataInicial) {
+            dataInicial = dataAtual;
+        }
+    });
+
+    const saldoAtual = bancaInicial + totalLucro;
+    const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
+
+    let diferencaDias = 0;
+    if (apostas.length > 0 && dataInicial) {
+        const hoje = new Date();
+        const diferencaMs = hoje - dataInicial;
+        diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
+
+    document.getElementById('bancaInicial').textContent = formatarParaExibicao(bancaInicial);
+    document.getElementById('saldoTotal').textContent = formatarParaExibicao(saldoAtual);
+
+    // ✅ Exibe balanço do dia com valor e cor corretos
+    const balancoDiaEl = document.getElementById('balancoDia');
+    if (balancoDia !== 0) {
+        balancoDiaEl.textContent = formatarParaExibicao(balancoDia);
+        balancoDiaEl.className = `text-lg font-medium ${balancoDia >= 0 ? 'text-green' : 'text-red'}`;
+    } else {
+        balancoDiaEl.textContent = 'R$ 0,00';
+        balancoDiaEl.className = 'text-lg font-medium text-gray-500';
+    }
+
+    document.getElementById('rentabilidadeTotal').textContent = `${rentabilidadeTotal}%`;
+    document.getElementById('valorInvestido').textContent = formatarParaExibicao(totalInvestido);
+
+    const balancoTotalEl = document.getElementById('balancoTotal');
+    balancoTotalEl.textContent = `R$ ${formatarParaExibicao(totalLucro)}`;
+    balancoTotalEl.className = `text-xl font-semibold ${totalLucro >= 0 ? 'text-green' : 'text-red'}`;
+
+    document.getElementById('tempoTotal').textContent = tempoTexto;
+    document.getElementById('totalApostas').textContent = apostas.length;
+
+    grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
+    grafico.update();
+    atualizarHistorico();
+}
 
         function atualizarHistorico() {
             const lista = document.getElementById('listaHistorico');
@@ -599,9 +655,9 @@
             apostas.forEach(a => {
                 const cor = a.resultado === 'green' ? 'text-green' : a.resultado === 'red' ? 'text-red' : 'text-yellow-600';
                 const corClara = a.resultado === 'green' ? 'bg-green/10' : a.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
-                const status = a.resultado === 'green' ? '🟢 Ganha' : a.resultado === 'red' ? '🔴 Perdida' : '🟡 Cashout';
+                const status = a.resultado === 'green' ? '🟢 Green' : a.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
                 lista.innerHTML += `
-                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick="abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})">
+                <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(a).replace(/"/g, '&quot;')})'>
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center ${cor} ${corClara}">
                             <i class="fa ${a.resultado === 'green' ? 'fa-arrow-up' : a.resultado === 'red' ? 'fa-arrow-down' : 'fa-refresh'}"></i>
