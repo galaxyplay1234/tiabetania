@@ -511,18 +511,36 @@
             document.body.style.overflow = 'auto';
         }
         async function salvarDeposito(e) {
-            e.preventDefault();
-            const valor = converterParaNumero(document.getElementById('valorDeposito').value);
-            const obs = document.getElementById('obsDeposito').value || 'Depósito';
-            const dataISO = dataHojeLocal();
-            if (valor <= 0) return alert('Valor inválido!');
-            await addDoc(collection(db, 'movimentacoes'), {
-                tipo: 'deposito', valor, obs, dataISO,
-                timestamp: new Date(dataISO + 'T12:00:00').getTime()
-            });
-            fecharModalDeposito();
-            atualizarDados();
+    e.preventDefault();
+
+    try {
+        const valor = converterParaNumero(document.getElementById('valorDeposito').value);
+        const obs = document.getElementById('obsDeposito').value || 'Depósito';
+        const dataISO = dataHojeLocal();
+
+        if (valor <= 0) {
+            alert('Valor inválido!');
+            return;
         }
+
+        const ref = await addDoc(collection(db, 'movimentacoes'), {
+            tipo: 'deposito',
+            valor,
+            obs,
+            dataISO,
+            timestamp: Date.now()
+        });
+
+        console.log(ref.id);
+
+        fecharModalDeposito();
+        atualizarDados();
+
+    } catch (e) {
+        console.error(e);
+        alert(e.message);
+    }
+}
 
         // 🚀 FUNÇÕES DE SAQUE
         function abrirModalSaque() {
@@ -537,18 +555,36 @@
             document.body.style.overflow = 'auto';
         }
         async function salvarSaque(e) {
-            e.preventDefault();
-            const valor = converterParaNumero(document.getElementById('valorSaque').value);
-            const obs = document.getElementById('obsSaque').value || 'Saque';
-            const dataISO = dataHojeLocal();
-            if (valor <= 0) return alert('Valor inválido!');
-            await addDoc(collection(db, 'movimentacoes'), {
-                tipo: 'saque', valor, obs, dataISO,
-                timestamp: new Date(dataISO + 'T12:00:00').getTime()
-            });
-            fecharModalSaque();
-            atualizarDados();
+    e.preventDefault();
+
+    try {
+        const valor = converterParaNumero(document.getElementById('valorSaque').value);
+        const obs = document.getElementById('obsSaque').value || 'Saque';
+        const dataISO = dataHojeLocal();
+
+        if (valor <= 0) {
+            alert('Valor inválido!');
+            return;
         }
+
+        const ref = await addDoc(collection(db, 'movimentacoes'), {
+            tipo: 'saque',
+            valor,
+            obs,
+            dataISO,
+            timestamp: Date.now()
+        });
+
+        console.log('Saque salvo:', ref.id);
+
+        fecharModalSaque();
+        atualizarDados();
+
+    } catch (erro) {
+        console.error(erro);
+        alert(erro.message);
+    }
+}
 
         function selecionarResultado(tipo) {
             document.getElementById('resultado').value = tipo;
