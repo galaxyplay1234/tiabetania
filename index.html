@@ -530,31 +530,50 @@
         
         
         const textoCentro = {
-    id: 'textoCentro',
+    id: "textoCentro",
 
-    beforeDraw(chart) {
+    afterDraw(chart) {
         const { ctx } = chart;
         const meta = chart.getDatasetMeta(0);
 
         if (!meta.data.length) return;
 
+        // Centro do gráfico
         const x = meta.data[0].x;
         const y = meta.data[0].y;
 
+        // Texto do centro
         ctx.save();
 
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        // Texto
         ctx.fillStyle = "#86868B";
         ctx.font = "500 13px SF Pro Display, sans-serif";
         ctx.fillText("Apostas", x, y - 14);
 
-        // Quantidade
         ctx.fillStyle = "#111";
         ctx.font = "700 30px SF Pro Display, sans-serif";
         ctx.fillText(apostas.length, x, y + 12);
+
+        // Números nas fatias
+        ctx.fillStyle = "#fff";
+        ctx.font = "700 18px SF Pro Display, sans-serif";
+
+        meta.data.forEach((arc, i) => {
+            const valor = chart.data.datasets[0].data[i];
+
+            if (valor === 0) return;
+
+            const angulo = (arc.startAngle + arc.endAngle) / 2;
+
+            const raio = (arc.innerRadius + arc.outerRadius) / 2;
+
+            const px = x + Math.cos(angulo) * raio;
+            const py = y + Math.sin(angulo) * raio;
+
+            ctx.fillText(valor, px, py);
+        });
 
         ctx.restore();
     }
