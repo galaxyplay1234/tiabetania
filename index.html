@@ -1104,26 +1104,26 @@ const diferencaDias = diasUnicos.size;
     const pct = v => total ? Math.round(v * 100 / total) : 0;
 
     document.getElementById("legendaGrafico").innerHTML = `
-    
+
     <div>
-        <div class="text-green text-xl">●</div>
-        <div class="text-3xl font-semibold">${green}</div>
-        <div class="text-gray-500 text-lg">Green</div>
-        <div class="text-green text-xl font-semibold">${pct(green)}%</div>
+        <div class="text-green text-sm">●</div>
+        <div class="text-xl font-semibold">${green}</div>
+        <div class="text-gray-500 text-sm">Green</div>
+        <div class="text-green text-sm font-medium">${pct(green)}%</div>
     </div>
 
     <div class="border-x border-gray-200">
-        <div class="text-red text-xl">●</div>
-        <div class="text-3xl font-semibold">${red}</div>
-        <div class="text-gray-500 text-lg">Red</div>
-        <div class="text-red text-xl font-semibold">${pct(red)}%</div>
+        <div class="text-red text-sm">●</div>
+        <div class="text-xl font-semibold">${red}</div>
+        <div class="text-gray-500 text-sm">Red</div>
+        <div class="text-red text-sm font-medium">${pct(red)}%</div>
     </div>
 
     <div>
-        <div class="text-yellow text-xl">●</div>
-        <div class="text-3xl font-semibold">${cash}</div>
-        <div class="text-gray-500 text-lg">Cashout</div>
-        <div class="text-yellow text-xl font-semibold">${pct(cash)}%</div>
+        <div class="text-yellow text-sm">●</div>
+        <div class="text-xl font-semibold">${cash}</div>
+        <div class="text-gray-500 text-sm">Cashout</div>
+        <div class="text-yellow text-sm font-medium">${pct(cash)}%</div>
     </div>
 
     `;
