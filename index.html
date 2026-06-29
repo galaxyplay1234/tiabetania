@@ -527,6 +527,41 @@
         let movimentacoes = []; // Nova variável para depósitos e saques
         let bancaInicial = 0;
         let grafico;
+        
+        
+        const textoCentro = {
+    id: 'textoCentro',
+
+    beforeDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+
+        if (!meta.data.length) return;
+
+        const x = meta.data[0].x;
+        const y = meta.data[0].y;
+
+        ctx.save();
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        // Texto
+        ctx.fillStyle = "#86868B";
+        ctx.font = "500 13px SF Pro Display, sans-serif";
+        ctx.fillText("Apostas", x, y - 14);
+
+        // Quantidade
+        ctx.fillStyle = "#111";
+        ctx.font = "700 30px SF Pro Display, sans-serif";
+        ctx.fillText(apostas.length, x, y + 12);
+
+        ctx.restore();
+    }
+};
+
+Chart.register(textoCentro);
+        
 
         // Função para pegar data de hoje no formato local
         function dataHojeLocal() {
@@ -583,6 +618,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
+    textoCentro: {},
     legend: {
         display: false
     },
@@ -590,11 +626,6 @@
         enabled: false
     }
 },
-animation: {
-    animateRotate: true,
-    animateScale: false
-}
-                },
                 
             });
         }
