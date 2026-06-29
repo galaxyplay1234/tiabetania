@@ -350,6 +350,22 @@
             </div>
         </div>
 
+        <div id="paginaLucro" class="hidden fixed inset-0 flex flex-col bg-[#F2F2F7]">
+
+    <div class="h-[64px]"></div>
+
+    <div class="sticky top-[64px] z-20 bg-[#F2F2F7] px-6 pt-6 pb-4">
+        <h2 class="text-xl font-semibold">
+            Lucro / Perda
+        </h2>
+    </div>
+
+    <div id="resumoLucro" class="px-6 space-y-4">
+    </div>
+
+</div>
+
+
         <div id="paginaHistorico" class="hidden fixed inset-0 flex flex-col bg-[#F2F2F7]">
 
     <!-- espaço do header -->
@@ -371,15 +387,22 @@
 </div>
 
         <nav class="liquid-nav">
+
     <button onclick="mudarPagina('home')" id="tabHome" class="liquid-btn active">
         <i class="fa fa-home"></i>
         <span>Home</span>
+    </button>
+
+    <button onclick="mudarPagina('lucro')" id="tabLucro" class="liquid-btn">
+        <i class="fa fa-line-chart"></i>
+        <span>Lucro</span>
     </button>
 
     <button onclick="mudarPagina('historico')" id="tabHistorico" class="liquid-btn">
         <i class="fa fa-list-alt"></i>
         <span>Histórico</span>
     </button>
+
 </nav>
 
         <!-- MODAL DE DEPÓSITO -->
@@ -578,17 +601,29 @@
 
         function mudarPagina(pagina){
 
-    document.getElementById('paginaHome').classList.toggle('hidden', pagina !== 'home');
-    document.getElementById('paginaHistorico').classList.toggle('hidden', pagina !== 'historico');
+    document.getElementById('paginaHome').classList.add('hidden');
+    document.getElementById('paginaLucro').classList.add('hidden');
+    document.getElementById('paginaHistorico').classList.add('hidden');
 
     document.getElementById('tabHome').classList.remove('active');
+    document.getElementById('tabLucro').classList.remove('active');
     document.getElementById('tabHistorico').classList.remove('active');
 
     if(pagina==="home"){
+        document.getElementById('paginaHome').classList.remove('hidden');
         document.getElementById('tabHome').classList.add('active');
-    }else{
+    }
+
+    if(pagina==="lucro"){
+        document.getElementById('paginaLucro').classList.remove('hidden');
+        document.getElementById('tabLucro').classList.add('active');
+    }
+
+    if(pagina==="historico"){
+        document.getElementById('paginaHistorico').classList.remove('hidden');
         document.getElementById('tabHistorico').classList.add('active');
     }
+
 }
 
         // 📥 Buscar banca do Firebase
@@ -938,6 +973,7 @@ try {
                 grafico.data.datasets[0].data = [qtdGreen, qtdRed, qtdCashout];
                 grafico.update();
                 atualizarHistorico();
+                atualizarLucroPerda();
 
             } catch (erro) {
     console.error('Erro ao carregar dados:', erro);
@@ -1002,6 +1038,65 @@ try {
                 }
             });
         }
+        
+        
+        
+        function atualizarLucroPerda(){
+
+    const resumo = document.getElementById("resumoLucro");
+
+    let dias = {};
+
+    apostas.forEach(aposta=>{
+
+        if(!dias[aposta.dataISO]){
+            dias[aposta.dataISO]=0;
+        }
+
+        dias[aposta.dataISO]+=aposta.lucro;
+
+    });
+
+    resumo.innerHTML="";
+
+    Object.keys(dias)
+        .sort((a,b)=>b.localeCompare(a))
+        .forEach(data=>{
+
+            const lucro=dias[data];
+
+            resumo.innerHTML+=`
+
+            <div class="rounded-2xl p-5 shadow-sm mb-3 ${lucro>=0?"bg-greenLight":"bg-redLight"}">
+
+                <div class="flex justify-between items-center">
+
+                    <div>
+
+                        <div class="text-sm text-gray-500">
+                            ${formatarDataExibicao(data)}
+                        </div>
+
+                        <div class="font-semibold mt-1">
+                            ${lucro>=0?"Lucro do dia":"Perda do dia"}
+                        </div>
+
+                    </div>
+
+                    <div class="text-xl font-bold ${lucro>=0?"text-green":"text-red"}">
+                        R$ ${formatarParaExibicao(lucro)}
+                    </div>
+
+                </div>
+
+            </div>
+
+            `;
+
+        });
+
+}
+        
 
         window.onload = () => {
             iniciarGrafico();
