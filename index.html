@@ -74,12 +74,18 @@
                 -ms-user-select: none;
                 user-select: none;
             }
-            .glass {
-                background: rgba(255, 255, 255, 0.85);
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            }
+            .glass{
+    background:rgba(255,255,255,.45);
+
+    backdrop-filter:blur(35px) saturate(180%);
+    -webkit-backdrop-filter:blur(35px) saturate(180%);
+
+    border-bottom:1px solid rgba(255,255,255,.45);
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.7),
+        0 4px 18px rgba(0,0,0,.04);
+}
             .btn-header{
     width:44px;
     height:44px;
@@ -285,7 +291,7 @@
 <body class="text-gray-900 no-select">
     <div class="max-w-md mx-auto min-h-screen relative pb-28">
 
-        <header class="sticky top-0 z-30 glass px-6 py-4 flex justify-between items-center h-[64px]">
+        <header class="sticky top-0 z-30 px-6 py-4 flex justify-between items-center h-[70px] glass">
             <h1 class="text-xl font-semibold">Tia Betânia</h1>
             <div class="flex gap-2">
                 <!-- Novos botões -->
