@@ -944,12 +944,9 @@ try {
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
                 const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
-                let diferencaDias = 0;
-                if (apostas.length > 0 && dataInicial) {
-                    const hoje = new Date();
-                    const diferencaMs = hoje - dataInicial;
-                    diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
-                }
+                // Conta apenas os dias diferentes em que houve apostas
+const diasUnicos = new Set(apostas.map(aposta => aposta.dataISO));
+const diferencaDias = diasUnicos.size;
 
                 const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
