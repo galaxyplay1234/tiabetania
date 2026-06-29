@@ -941,27 +941,26 @@ Chart.register(textoCentro);
         async function atualizarDados() {
             try {
                 // Busca banca
-                const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
-                bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
-
-                // Busca apostas — MESMA FORMA ORIGINAL
                 const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
-                const snapshot = await getDocs(q);
-                apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
 
-                // Busca movimentações (depósito/saque)
-                movimentacoes = [];
+const [bancaDoc, snapshot, snapMov] = await Promise.all([
+    getDoc(doc(db, 'configuracoes', 'banca')),
+    getDocs(q),
+    getDocs(qMov).catch(() => ({ docs: [] }))
+]);
 
-try {
-    const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
-    const snapMov = await getDocs(qMov);
-    movimentacoes = snapMov.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
-} catch (e) {
-    console.log("Coleção movimentacoes ainda não existe.");
-}
+bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+
+apostas = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
+
+movimentacoes = snapMov.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
 
                 let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
                 const hojeISO = dataHojeLocal();
