@@ -325,15 +325,24 @@
 
             <div class="bg-white rounded-2xl p-5 shadow-sm">
 
-    <div style="height:300px">
-        <canvas id="graficoResultados"></canvas>
+    <div class="bg-white rounded-2xl p-5 shadow-sm">
+
+    <div class="relative flex justify-center items-center">
+
+        <div style="width:220px;height:220px;">
+            <canvas id="graficoResultados"></canvas>
+        </div>
+
+        <!-- Conteúdo no centro do gráfico -->
+        <div id="centroGrafico"
+             class="absolute text-center pointer-events-none">
+        </div>
+
     </div>
 
-    <div id="legendaGrafico" class="grid grid-cols-3 mt-6 text-center"></div>
-
-    <p class="text-gray-500 text-sm mt-5 text-center">
-        Quantidade de Green, Red e Cashout
-    </p>
+    <div id="legendaGrafico"
+         class="grid grid-cols-3 mt-5 text-center">
+    </div>
 
 </div>
 
@@ -582,7 +591,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '65%',
+                    cutout: '78%',
                     plugins: {
     legend: {
         display: false
@@ -1104,27 +1113,43 @@ const diferencaDias = diasUnicos.size;
 
     const pct = v => total ? Math.round(v * 100 / total) : 0;
 
+    // Texto que aparece dentro do gráfico
+    document.getElementById("centroGrafico").innerHTML = `
+        <div class="text-gray-400 text-xs font-medium">
+            Total
+        </div>
+
+        <div class="text-4xl font-bold text-gray-900">
+            ${total}
+        </div>
+
+        <div class="text-gray-400 text-sm">
+            apostas
+        </div>
+    `;
+
+    // Legenda abaixo do gráfico
     document.getElementById("legendaGrafico").innerHTML = `
     
     <div>
-        <div class="text-green text-xl">●</div>
-        <div class="text-3xl font-semibold">${green}</div>
-        <div class="text-gray-500 text-lg">Green</div>
-        <div class="text-green text-xl font-semibold">${pct(green)}%</div>
+        <div class="text-green text-lg">●</div>
+        <div class="text-2xl font-bold">${green}</div>
+        <div class="text-sm text-gray-500">Green</div>
+        <div class="text-green font-semibold">${pct(green)}%</div>
     </div>
 
     <div class="border-x border-gray-200">
-        <div class="text-red text-xl">●</div>
-        <div class="text-3xl font-semibold">${red}</div>
-        <div class="text-gray-500 text-lg">Red</div>
-        <div class="text-red text-xl font-semibold">${pct(red)}%</div>
+        <div class="text-red text-lg">●</div>
+        <div class="text-2xl font-bold">${red}</div>
+        <div class="text-sm text-gray-500">Red</div>
+        <div class="text-red font-semibold">${pct(red)}%</div>
     </div>
 
     <div>
-        <div class="text-yellow text-xl">●</div>
-        <div class="text-3xl font-semibold">${cash}</div>
-        <div class="text-gray-500 text-lg">Cashout</div>
-        <div class="text-yellow text-xl font-semibold">${pct(cash)}%</div>
+        <div class="text-yellow text-lg">●</div>
+        <div class="text-2xl font-bold">${cash}</div>
+        <div class="text-sm text-gray-500">Cashout</div>
+        <div class="text-yellow font-semibold">${pct(cash)}%</div>
     </div>
 
     `;
