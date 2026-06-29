@@ -602,33 +602,38 @@ Chart.register(textoCentro);
         }
 
         function iniciarGrafico() {
-            const ctx = document.getElementById('graficoResultados').getContext('2d');
-            grafico = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Green', 'Red', 'Cashout'],
-                    datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
-                        borderWidth: 0
-                    }]
+    const ctx = document.getElementById('graficoResultados').getContext('2d');
+
+    grafico = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Green', 'Red', 'Cashout'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: ['#34C759', '#FF3B30', '#FFCC00'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                textoCentro: {},
+                legend: {
+                    display: false
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-    textoCentro: {},
-    legend: {
-        display: false
-    },
-    tooltip: {
-        enabled: false
-    }
-},
-                
-            });
+                tooltip: {
+                    enabled: false
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: false
+            }
         }
+    });
+}
 
         function mudarPagina(pagina){
 
