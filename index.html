@@ -582,20 +582,46 @@
                     }
                 },
                 plugins: [{
-                    id: 'textoQuantidade',
-                    afterDatasetsDraw: function(chart) {
-                        const { ctx, data } = chart;
-                        ctx.font = 'bold 16px SF Pro Display';
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        const meta = chart.getDatasetMeta(0);
-                        meta.data.forEach((fatia, i) => {
-                            const pos = fatia.tooltipPosition();
-                            if (data.datasets[0].data[i] > 0) ctx.fillText(data.datasets[0].data[i], pos.x, pos.y);
-                        });
-                    }
-                }]
+    id: 'textoQuantidade',
+    afterDatasetsDraw(chart) {
+
+        const { ctx, data } = chart;
+        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+        const meta = chart.getDatasetMeta(0);
+
+        meta.data.forEach((fatia, i) => {
+
+            const valor = data.datasets[0].data[i];
+
+            if (valor <= 0) return;
+
+            const porcentagem = total > 0
+                ? Math.round((valor / total) * 100)
+                : 0;
+
+            const pos = fatia.tooltipPosition();
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // Quantidade
+            ctx.font = "bold 18px SF Pro Display";
+            ctx.fillText(valor, pos.x, pos.y - 14);
+
+            // Nome
+            ctx.font = "600 11px SF Pro Display";
+            ctx.fillText(data.labels[i], pos.x, pos.y + 2);
+
+            // Porcentagem
+            ctx.font = "bold 11px SF Pro Display";
+            ctx.fillText(`${porcentagem}%`, pos.x, pos.y + 17);
+
+        });
+
+    }
+}]
             });
         }
 
@@ -944,9 +970,12 @@ try {
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
                 const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
-                // Conta apenas os dias diferentes em que houve apostas
-const diasUnicos = new Set(apostas.map(aposta => aposta.dataISO));
-const diferencaDias = diasUnicos.size;
+                let diferencaDias = 0;
+                if (apostas.length > 0 && dataInicial) {
+                    const hoje = new Date();
+                    const diferencaMs = hoje - dataInicial;
+                    diferencaDias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24)) + 1;
+                }
 
                 const tempoTexto = diferencaDias < 30 ? `${diferencaDias} dias` : diferencaDias < 60 ? `1 mês` : `${Math.floor(diferencaDias / 30)} meses`;
 
