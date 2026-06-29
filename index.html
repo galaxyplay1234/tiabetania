@@ -989,19 +989,20 @@ try {
                     }
                 });
 
-                // ✅ SOMA DEPÓSITOS E SAQUES
-                let totalDep = 0, totalSaq = 0;
-                movimentacoes.forEach(m => {
-                    const v = m.valor || 0;
-                    if (m.tipo === 'deposito') {
-                        totalDep += v;
-                        if (m.dataISO === hojeISO) balancoDia += v;
-                    }
-                    if (m.tipo === 'saque') {
-                        totalSaq += v;
-                        if (m.dataISO === hojeISO) balancoDia -= v;
-                    }
-                });
+                // SOMA DEPÓSITOS E SAQUES
+let totalDep = 0, totalSaq = 0;
+
+movimentacoes.forEach(m => {
+    const v = m.valor || 0;
+
+    if (m.tipo === 'deposito') {
+        totalDep += v;
+    }
+
+    if (m.tipo === 'saque') {
+        totalSaq += v;
+    }
+});
 
                 // ✅ CÁLCULO DO SALDO ATUALIZADO
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
