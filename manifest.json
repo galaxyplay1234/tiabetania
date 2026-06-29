@@ -1,0 +1,15 @@
+{
+  "name": "Tia Betânia",
+  "short_name": "Tia Betânia",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F2F2F7",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "icone.PNG",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
