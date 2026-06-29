@@ -327,10 +327,24 @@
 
         <div id="paginaHome" class="px-6 py-6 space-y-6">
             <div class="bg-white rounded-2xl p-5 shadow-sm">
-                <div class="flex justify-between items-center mb-3">
-                    <p class="text-gray-500 text-base">Banca Inicial</p>
-                    <p class="text-sm text-gray-600">R$ <span id="bancaInicial">0,00</span></p>
-                </div>
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+
+    <div>
+        Banca Inicial:
+        <span id="bancaInicial" class="text-gray-700 font-medium">0,00</span>
+    </div>
+
+    <div>
+        Depósitos:
+        <span id="totalDepositos" class="text-green font-medium">0,00</span>
+    </div>
+
+    <div>
+        Saques:
+        <span id="totalSaques" class="text-red font-medium">0,00</span>
+    </div>
+
+</div>
                 <p class="text-gray-500 text-base">Saldo Atual</p>
                 <h2 class="text-3xl font-bold mt-1">R$ <span id="saldoTotal">0,00</span></h2>
                 <div class="grid grid-cols-2 gap-4 mt-5">
@@ -1016,6 +1030,9 @@ movimentacoes.forEach(m => {
         totalSaq += v;
     }
 });
+
+document.getElementById('totalDepositos').textContent = formatarParaExibicao(totalDep);
+document.getElementById('totalSaques').textContent = formatarParaExibicao(totalSaq);
 
                 // ✅ CÁLCULO DO SALDO ATUALIZADO
                 const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
