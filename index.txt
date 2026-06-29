@@ -19,7 +19,20 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    query,
+    orderBy,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         // Sua configuração do Firebase
         const firebaseConfig = {
@@ -48,6 +61,7 @@
         window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
+        window.serverTimestamp = serverTimestamp;
     </script>
 
     <script>
@@ -749,7 +763,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: Date.now()
+            timestamp: serverTimestamp()
         });
 
         console.log(ref.id);
@@ -793,7 +807,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: Date.now()
+            timestamp: serverTimestamp()
         });
 
         console.log('Saque salvo:', ref.id);
@@ -941,27 +955,26 @@ Chart.register(textoCentro);
         async function atualizarDados() {
             try {
                 // Busca banca
-                const bancaDoc = await getDoc(doc(db, 'configuracoes', 'banca'));
-                bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
-
-                // Busca apostas — MESMA FORMA ORIGINAL
                 const q = query(collection(db, 'apostas'), orderBy('timestamp', 'desc'));
-                const snapshot = await getDocs(q);
-                apostas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
 
-                // Busca movimentações (depósito/saque)
-                movimentacoes = [];
+const [bancaDoc, snapshot, snapMov] = await Promise.all([
+    getDoc(doc(db, 'configuracoes', 'banca')),
+    getDocs(q),
+    getDocs(qMov).catch(() => ({ docs: [] }))
+]);
 
-try {
-    const qMov = query(collection(db, 'movimentacoes'), orderBy('timestamp', 'desc'));
-    const snapMov = await getDocs(qMov);
-    movimentacoes = snapMov.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
-} catch (e) {
-    console.log("Coleção movimentacoes ainda não existe.");
-}
+bancaInicial = bancaDoc.exists() ? bancaDoc.data().valor : 0;
+
+apostas = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
+
+movimentacoes = snapMov.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
 
                 let totalInvestido = 0, totalLucro = 0, qtdGreen = 0, qtdRed = 0, qtdCashout = 0, balancoDia = 0;
                 const hojeISO = dataHojeLocal();
