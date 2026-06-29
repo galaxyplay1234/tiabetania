@@ -19,7 +19,20 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, orderBy } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    collection,
+    query,
+    orderBy,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         // Sua configuração do Firebase
         const firebaseConfig = {
@@ -48,6 +61,7 @@
         window.collection = collection;
         window.query = query;
         window.orderBy = orderBy;
+        window.serverTimestamp = serverTimestamp;
     </script>
 
     <script>
@@ -749,7 +763,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: Date.now()
+            timestamp: serverTimestamp()
         });
 
         console.log(ref.id);
@@ -793,7 +807,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: Date.now()
+            timestamp: serverTimestamp()
         });
 
         console.log('Saque salvo:', ref.id);
