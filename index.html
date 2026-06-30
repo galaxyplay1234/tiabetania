@@ -777,7 +777,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: serverTimestamp()
+            timestamp: Date.now()
         });
 
         console.log(ref.id);
@@ -821,7 +821,7 @@ Chart.register(textoCentro);
             valor,
             obs,
             dataISO,
-            timestamp: serverTimestamp()
+            timestamp: Date.now()
         });
 
         console.log('Saque salvo:', ref.id);
