@@ -306,8 +306,19 @@
 
     padding-bottom:160px;
 }
+ 
+.btn-resultado.active{
+    color:#fff;
+}
+
+#btnAndamento.active{
+    background:#9CA3AF;
+    border-color:#9CA3AF;
+    color:#fff;
+}               
+    
         
-        
+                
     </style>
 </head>
 <body class="text-gray-900 no-select">
@@ -527,11 +538,30 @@
 
                     <div>
                         <label class="block text-sm text-gray-600 mb-2">Resultado</label>
-                        <div class="flex gap-2">
-                            <div id="btnGreen" class="btn-resultado btn-green" onclick="selecionarResultado('green')">✅ Green</div>
-                            <div id="btnRed" class="btn-resultado btn-red" onclick="selecionarResultado('red')">❌ Red</div>
-                            <div id="btnCashout" class="btn-resultado btn-cashout" onclick="selecionarResultado('cashout')">🔄 Cashout</div>
-                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+
+    <div id="btnGreen" class="btn-resultado btn-green"
+        onclick="selecionarResultado('green')">
+        ✅ Green
+    </div>
+
+    <div id="btnRed" class="btn-resultado btn-red"
+        onclick="selecionarResultado('red')">
+        ❌ Red
+    </div>
+
+    <div id="btnCashout" class="btn-resultado btn-cashout"
+        onclick="selecionarResultado('cashout')">
+        🔄 Cashout
+    </div>
+
+    <div id="btnAndamento"
+        class="btn-resultado"
+        onclick="selecionarResultado('andamento')">
+        ⚪ Em andamento
+    </div>
+
+</div>
                     </div>
 
                     <div>
@@ -836,12 +866,19 @@ Chart.register(textoCentro);
 }
 
         function selecionarResultado(tipo) {
-            document.getElementById('resultado').value = tipo;
-            document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
-            document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
-            document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
-            document.getElementById('campoValorCashout').classList.toggle('hidden', tipo !== 'cashout');
-        }
+
+    document.getElementById('resultado').value = tipo;
+
+    document.getElementById('btnGreen').classList.toggle('active', tipo === 'green');
+    document.getElementById('btnRed').classList.toggle('active', tipo === 'red');
+    document.getElementById('btnCashout').classList.toggle('active', tipo === 'cashout');
+    document.getElementById('btnAndamento').classList.toggle('active', tipo === 'andamento');
+
+    document.getElementById('campoValorCashout').classList.toggle(
+        'hidden',
+        tipo !== 'cashout'
+    );
+}
 
         function abrirModal(aposta = null) {
             document.getElementById('modalAposta').classList.remove('hidden');
@@ -914,16 +951,29 @@ Chart.register(textoCentro);
             const timestamp = Date.now();
 
             let lucro, retorno;
-            if (resultado === 'green') {
-                retorno = valor * odd;
-                lucro = retorno - valor;
-            } else if (resultado === 'red') {
-                retorno = 0;
-                lucro = -valor;
-            } else {
-                retorno = valorCashout;
-                lucro = valorCashout - valor;
-            }
+
+if (resultado === 'green') {
+
+    retorno = valor * odd;
+    lucro = retorno - valor;
+
+} else if (resultado === 'red') {
+
+    retorno = 0;
+    lucro = -valor;
+
+} else if (resultado === 'cashout') {
+
+    retorno = valorCashout;
+    lucro = valorCashout - valor;
+
+} else if (resultado === 'andamento') {
+
+    // Ainda não finalizada
+    retorno = valor * odd; // possível ganho
+    lucro = 0;
+
+}
 
             const dados = {
                 valor, odd, dataISO, data: dataFormatada,
@@ -996,25 +1046,32 @@ movimentacoes = snapMov.docs.map(doc => ({
 
                 // ✅ CÁLCULO DAS APOSTAS — EXATAMENTE COMO ERA ANTES
                 apostas.forEach(a => {
-                    const valor = a.valor || 0;
-                    const lucro = a.lucro || 0;
 
-                    totalInvestido += valor;
-                    totalLucro += lucro;
+    // Ignora apostas em andamento nos cálculos
+    if (a.resultado === 'andamento') {
+        return;
+    }
 
-                    if (a.resultado === 'green') qtdGreen++;
-                    else if (a.resultado === 'red') qtdRed++;
-                    else if (a.resultado === 'cashout') qtdCashout++;
+    const valor = a.valor || 0;
+    const lucro = a.lucro || 0;
 
-                    if (a.dataISO === hojeISO) {
-                        balancoDia += lucro;
-                    }
+    totalInvestido += valor;
+    totalLucro += lucro;
 
-                    const dataAtual = new Date(a.dataISO);
-                    if (!dataInicial || dataAtual < dataInicial) {
-                        dataInicial = dataAtual;
-                    }
-                });
+    if (a.resultado === 'green') qtdGreen++;
+    else if (a.resultado === 'red') qtdRed++;
+    else if (a.resultado === 'cashout') qtdCashout++;
+
+    if (a.dataISO === hojeISO) {
+        balancoDia += lucro;
+    }
+
+    const dataAtual = new Date(a.dataISO);
+    if (!dataInicial || dataAtual < dataInicial) {
+        dataInicial = dataAtual;
+    }
+
+});
 
                 // SOMA DEPÓSITOS E SAQUES
 let totalDep = 0, totalSaq = 0;
@@ -1106,9 +1163,28 @@ const diferencaDias = diasUnicos.size;
                         <p class="font-semibold text-red-600">- R$ ${formatarParaExibicao(item.valor)}</p>
                     </div>`;
                 } else {
-                    const cor = item.resultado === 'green' ? 'text-green' : item.resultado === 'red' ? 'text-red' : 'text-yellow-600';
-                    const corClara = item.resultado === 'green' ? 'bg-green/10' : item.resultado === 'red' ? 'bg-red/10' : 'bg-yellow/10';
-                    const status = item.resultado === 'green' ? '🟢 Green' : item.resultado === 'red' ? '🔴 Red' : '🟡 Cashout';
+                    let cor, corClara, status;
+
+if (item.resultado === "green") {
+    cor = "text-green";
+    corClara = "bg-green/10";
+    status = "🟢 Green";
+
+} else if (item.resultado === "red") {
+    cor = "text-red";
+    corClara = "bg-red/10";
+    status = "🔴 Red";
+
+} else if (item.resultado === "cashout") {
+    cor = "text-yellow-600";
+    corClara = "bg-yellow/10";
+    status = "🟡 Cashout";
+
+} else {
+    cor = "text-gray-500";
+    corClara = "bg-gray-200";
+    status = "⚪ Em andamento";
+}
                     lista.innerHTML += `
                     <div class="aposta-item bg-white rounded-xl p-4 shadow-sm flex items-center justify-between" onclick='abrirModal(${JSON.stringify(item).replace(/"/g, '&quot;')})'>
                         <div class="flex items-center gap-3">
@@ -1124,7 +1200,23 @@ const diferencaDias = diasUnicos.size;
                         </div>
                         <div class="text-right">
                             <p class="text-xs font-medium mb-1 ${cor}">${status}</p>
-                            <p class="font-semibold ${cor}">R$ ${formatarParaExibicao(item.lucro)}</p>
+                            ${
+item.resultado === "andamento"
+? `
+<p class="text-xs text-gray-500 mb-1">
+    Possível ganho
+</p>
+
+<p class="font-semibold text-gray-700">
+    R$ ${formatarParaExibicao(item.retorno)}
+</p>
+`
+: `
+<p class="font-semibold ${cor}">
+    R$ ${formatarParaExibicao(item.lucro)}
+</p>
+`
+}
                         </div>
                     </div>`;
                 }
