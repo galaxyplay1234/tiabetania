@@ -1043,10 +1043,12 @@ movimentacoes = snapMov.docs.map(doc => ({
                 let dataInicial = null;
 
                 // ✅ CÁLCULO DAS APOSTAS — EXATAMENTE COMO ERA ANTES
-                apostas.forEach(a => {
+                let valorEmAndamento = 0;
 
-    // Ignora apostas em andamento nos cálculos
+apostas.forEach(a => {
+
     if (a.resultado === 'andamento') {
+        valorEmAndamento += a.valor || 0;
         return;
     }
 
@@ -1068,7 +1070,6 @@ movimentacoes = snapMov.docs.map(doc => ({
     if (!dataInicial || dataAtual < dataInicial) {
         dataInicial = dataAtual;
     }
-
 });
 
                 // SOMA DEPÓSITOS E SAQUES
@@ -1090,7 +1091,7 @@ document.getElementById('totalDepositos').textContent = formatarParaExibicao(tot
 document.getElementById('totalSaques').textContent = formatarParaExibicao(totalSaq);
 
                 // ✅ CÁLCULO DO SALDO ATUALIZADO
-                const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq;
+                const saldoAtual = bancaInicial + totalLucro + totalDep - totalSaq - valorEmAndamento;
                 const rentabilidadeTotal = bancaInicial > 0 ? ((totalLucro / bancaInicial) * 100).toFixed(2).replace('.', ',') : '0,00';
 
                 // Conta apenas os dias diferentes em que houve apostas
